@@ -330,6 +330,32 @@ class MainWindow(QMainWindow):
         container_layout.setContentsMargins(50, 40, 50, 50)
         container_layout.setSpacing(32)
 
+        # Логотип и заголовок
+        header_row = QHBoxLayout()
+        header_row.setSpacing(24)
+
+        # Логотип (если есть файл logo.png)
+        logo_label = QLabel()
+        logo_label.setFixedSize(100, 100)
+        logo_label.setScaledContents(True)
+        logo_label.setStyleSheet("""
+            background-color: transparent;
+            border-radius: 12px;
+        """)
+        # Попытка загрузить логотип (если файл существует)
+        try:
+            from PyQt6.QtGui import QPixmap
+            pixmap = QPixmap('logo.png')
+            if not pixmap.isNull():
+                logo_label.setPixmap(pixmap)
+                header_row.addWidget(logo_label)
+        except:
+            pass
+
+        # Текстовый блок заголовка
+        title_layout = QVBoxLayout()
+        title_layout.setSpacing(8)
+
         # Заголовок
         title = QLabel('Учебный график')
         title.setObjectName("mainTitle")
@@ -337,15 +363,30 @@ class MainWindow(QMainWindow):
         subtitle = QLabel('Создание календарного учебного графика')
         subtitle.setObjectName("subtitle")
 
-        container_layout.addWidget(title)
-        container_layout.addWidget(subtitle)
+        title_layout.addWidget(title)
+        title_layout.addWidget(subtitle)
+
+        header_row.addLayout(title_layout)
+        header_row.addStretch()
+
+        container_layout.addLayout(header_row)
+
+        # Декоративная линия под хедером
+        header_line = QFrame()
+        header_line.setFrameShape(QFrame.Shape.HLine)
+        header_line.setStyleSheet("""
+            QFrame {
+                background: qlineargradient(x1:0, y1:0, x2:1, y2:0,
+                    stop:0 transparent, stop:0.2 #34d399, stop:0.8 #34d399, stop:1 transparent);
+                border: none;
+                height: 3px;
+                margin: 16px 0px;
+            }
+        """)
+        container_layout.addWidget(header_line)
         container_layout.addSpacing(8)
 
-        # Настройки
-        settings_label = QLabel('Настройки')
-        settings_label.setObjectName("sectionTitle")
-        container_layout.addWidget(settings_label)
-
+        # Настройки (без заголовка)
         settings_row = QHBoxLayout()
         settings_row.setSpacing(20)
 
@@ -381,11 +422,11 @@ class MainWindow(QMainWindow):
         button_row = QHBoxLayout()
         button_row.setSpacing(12)
 
-        example_btn = QPushButton('Пример ординатуры')
+        example_btn = QPushButton('📋 Пример ординатуры')
         example_btn.setObjectName("secondaryButton")
         example_btn.clicked.connect(self.load_example)
 
-        clear_btn = QPushButton('Очистить')
+        clear_btn = QPushButton('🗑️ Очистить')
         clear_btn.setObjectName("secondaryButton")
         clear_btn.clicked.connect(self.clear_data)
 
@@ -407,8 +448,9 @@ class MainWindow(QMainWindow):
         self.table.setHorizontalHeaderLabels(['Год', 'Семестр', 'Тип', 'Недели'])
         self.table.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeMode.Stretch)
         self.table.verticalHeader().setVisible(False)
-        self.table.verticalHeader().setDefaultSectionSize(72)
+        self.table.verticalHeader().setDefaultSectionSize(82)
         self.table.setAlternatingRowColors(True)
+        self.table.setShowGrid(False)
         self.table.setMinimumHeight(400)
         container_layout.addWidget(self.table)
 
@@ -416,11 +458,11 @@ class MainWindow(QMainWindow):
         table_btn_row = QHBoxLayout()
         table_btn_row.setSpacing(12)
 
-        add_row_btn = QPushButton('+ Добавить строку')
+        add_row_btn = QPushButton('➕ Добавить строку')
         add_row_btn.setObjectName("secondaryButton")
         add_row_btn.clicked.connect(self.add_row)
 
-        remove_row_btn = QPushButton('− Удалить строку')
+        remove_row_btn = QPushButton('➖ Удалить строку')
         remove_row_btn.setObjectName("secondaryButton")
         remove_row_btn.clicked.connect(self.remove_row)
 
@@ -435,11 +477,11 @@ class MainWindow(QMainWindow):
         action_row = QHBoxLayout()
         action_row.setSpacing(16)
 
-        generate_btn = QPushButton('Сгенерировать график')
+        generate_btn = QPushButton('🎓 Сгенерировать график')
         generate_btn.setObjectName("primaryButton")
         generate_btn.clicked.connect(self.generate_schedule)
 
-        self.download_btn = QPushButton('Скачать Excel')
+        self.download_btn = QPushButton('📥 Скачать Excel')
         self.download_btn.setObjectName("downloadButton")
         self.download_btn.clicked.connect(self.download_excel)
         self.download_btn.setEnabled(False)
@@ -467,11 +509,24 @@ class MainWindow(QMainWindow):
         self.preview_table.verticalHeader().setVisible(False)
         self.preview_table.verticalHeader().setDefaultSectionSize(60)
         self.preview_table.setAlternatingRowColors(True)
+        self.preview_table.setShowGrid(False)
         self.preview_table.setMinimumHeight(350)
         preview_layout.addWidget(self.preview_table)
 
         self.preview_section.setVisible(False)
         container_layout.addWidget(self.preview_section)
+
+        # Footer с авторами
+        footer_layout = QVBoxLayout()
+        footer_layout.setContentsMargins(0, 32, 0, 0)
+        footer_layout.setSpacing(0)
+
+        authors_label = QLabel('Разработчики: Бахмутов Е., Клюев П.')
+        authors_label.setObjectName("authorsLabel")
+        authors_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        footer_layout.addWidget(authors_label)
+
+        container_layout.addLayout(footer_layout)
 
         content_layout.addWidget(content_container)
 
@@ -485,18 +540,20 @@ class MainWindow(QMainWindow):
             }
 
             QLabel#mainTitle {
-                font-size: 32px;
-                font-weight: 700;
+                font-size: 42px;
+                font-weight: 800;
                 color: #fafafa;
                 margin: 0;
                 padding: 0;
+                letter-spacing: -0.5px;
             }
 
             QLabel#subtitle {
-                font-size: 16px;
-                color: #a3a8b4;
-                margin-top: 8px;
-                font-weight: 400;
+                font-size: 18px;
+                color: #34d399;
+                margin-top: 4px;
+                font-weight: 500;
+                letter-spacing: 0.3px;
             }
 
             QLabel#sectionTitle {
@@ -512,6 +569,13 @@ class MainWindow(QMainWindow):
                 color: #fafafa;
             }
 
+            QLabel#authorsLabel {
+                font-size: 13px;
+                color: #6b7280;
+                font-weight: 400;
+                opacity: 0.7;
+            }
+
             QComboBox {
                 padding: 12px 16px;
                 border: 1px solid #464a5e;
@@ -525,11 +589,11 @@ class MainWindow(QMainWindow):
             }
 
             QComboBox:hover {
-                border-color: #ff4b4b;
+                border-color: #2d8659;
             }
 
             QComboBox:focus {
-                border-color: #ff4b4b;
+                border-color: #2d8659;
                 outline: none;
             }
 
@@ -549,7 +613,7 @@ class MainWindow(QMainWindow):
             QComboBox QAbstractItemView {
                 background-color: #262730;
                 border: 1px solid #464a5e;
-                selection-background-color: #ff4b4b;
+                selection-background-color: #2d8659;
                 selection-color: #ffffff;
                 outline: none;
                 padding: 6px;
@@ -564,58 +628,78 @@ class MainWindow(QMainWindow):
             }
 
             QComboBox QAbstractItemView::item:hover {
-                background-color: #ff4b4b;
+                background-color: #2d8659;
                 color: #ffffff;
             }
 
             QPushButton#primaryButton {
                 padding: 14px 32px;
-                border: none;
-                border-radius: 8px;
-                background-color: #ff4b4b;
+                border: 2px solid #34d399;
+                border-radius: 10px;
+                background: qlineargradient(x1:0, y1:0, x2:1, y2:0,
+                    stop:0 #34d399, stop:0.5 #2d8659, stop:1 #10b981);
                 color: white;
-                font-size: 16px;
-                font-weight: 600;
-                min-height: 52px;
+                font-size: 17px;
+                font-weight: 700;
+                min-height: 56px;
+                letter-spacing: 1px;
             }
 
             QPushButton#primaryButton:hover {
-                background-color: #ff2b2b;
+                background: qlineargradient(x1:0, y1:0, x2:1, y2:0,
+                    stop:0 #6ee7b7, stop:0.5 #34d399, stop:1 #10b981);
+                border-color: #6ee7b7;
+                border-width: 3px;
+                padding: 13px 31px;
             }
 
             QPushButton#primaryButton:pressed {
-                background-color: #e04040;
+                background: qlineargradient(x1:0, y1:0, x2:1, y2:0,
+                    stop:0 #22c55e, stop:0.5 #16a34a, stop:1 #15803d);
+                border-color: #16a34a;
+                border-width: 2px;
+                padding: 14px 32px;
             }
 
             QPushButton#downloadButton {
                 padding: 14px 32px;
-                border: 1px solid #464a5e;
-                border-radius: 8px;
-                background-color: #262730;
-                color: #fafafa;
-                font-size: 16px;
-                font-weight: 600;
-                min-height: 52px;
+                border: 2px solid #3b82f6;
+                border-radius: 10px;
+                background: qlineargradient(x1:0, y1:0, x2:1, y2:0,
+                    stop:0 #3b82f6, stop:0.5 #2563eb, stop:1 #1d4ed8);
+                color: white;
+                font-size: 17px;
+                font-weight: 700;
+                min-height: 56px;
+                letter-spacing: 0.5px;
             }
 
             QPushButton#downloadButton:hover {
-                background-color: #31343f;
-                border-color: #ff4b4b;
+                background: qlineargradient(x1:0, y1:0, x2:1, y2:0,
+                    stop:0 #93c5fd, stop:0.5 #60a5fa, stop:1 #3b82f6);
+                border-color: #93c5fd;
+                border-width: 3px;
+                padding: 13px 31px;
             }
 
             QPushButton#downloadButton:pressed {
-                background-color: #1c1f26;
+                background: qlineargradient(x1:0, y1:0, x2:1, y2:0,
+                    stop:0 #2563eb, stop:0.5 #1d4ed8, stop:1 #1e40af);
+                border-color: #1d4ed8;
+                border-width: 2px;
+                padding: 14px 32px;
             }
 
             QPushButton#downloadButton:disabled {
-                background-color: #1a1c24;
+                background: #1a1c24;
                 color: #464a5e;
                 border-color: #31343f;
+                border-width: 1px;
             }
 
             QPushButton#secondaryButton {
                 padding: 10px 20px;
-                border: 1px solid #464a5e;
+                border: 2px solid #464a5e;
                 border-radius: 8px;
                 background-color: #262730;
                 color: #fafafa;
@@ -625,19 +709,23 @@ class MainWindow(QMainWindow):
             }
 
             QPushButton#secondaryButton:hover {
-                background-color: #31343f;
-                border-color: #ff4b4b;
+                background: qlineargradient(x1:0, y1:0, x2:0, y2:1,
+                    stop:0 #3d4150, stop:1 #2d3038);
+                border-color: #34d399;
+                border-width: 2px;
+                color: #34d399;
             }
 
             QPushButton#secondaryButton:pressed {
                 background-color: #1c1f26;
+                border-color: #2d8659;
+                color: #2d8659;
             }
 
             QTableWidget {
                 border: 1px solid #31343f;
                 border-radius: 8px;
                 background-color: #1a1c24;
-                gridline-color: #31343f;
                 font-size: 16px;
                 color: #fafafa;
             }
@@ -660,7 +748,6 @@ class MainWindow(QMainWindow):
                 padding: 16px;
                 border: none;
                 border-bottom: 2px solid #31343f;
-                border-right: 1px solid #31343f;
                 font-weight: 600;
                 font-size: 15px;
                 color: #fafafa;
@@ -733,88 +820,87 @@ class MainWindow(QMainWindow):
         row_position = self.table.rowCount()
         self.table.insertRow(row_position)
 
-        combo_style = """
+        # Стиль для комбобоксов в таблице
+        table_combo_style = """
             QComboBox {
-                padding: 14px 18px;
+                padding: 11px 16px;
                 border: 1px solid #464a5e;
                 border-radius: 6px;
                 background-color: #262730;
                 font-size: 16px;
                 color: #fafafa;
-                font-weight: 400;
             }
             QComboBox:hover {
-                border-color: #ff4b4b;
+                border-color: #34d399;
+                border-width: 2px;
+                background-color: #2d3038;
             }
             QComboBox::drop-down {
                 border: none;
-                width: 32px;
+                width: 28px;
             }
             QComboBox::down-arrow {
                 image: none;
                 border-left: 5px solid transparent;
                 border-right: 5px solid transparent;
-                border-top: 8px solid #a3a8b4;
+                border-top: 7px solid #a3a8b4;
                 margin-right: 10px;
+            }
+            QComboBox:hover::down-arrow {
+                border-top-color: #34d399;
             }
             QComboBox QAbstractItemView {
                 background-color: #262730;
                 border: 1px solid #464a5e;
-                selection-background-color: #ff4b4b;
+                selection-background-color: #2d8659;
                 selection-color: #ffffff;
-                outline: none;
                 font-size: 16px;
             }
             QComboBox QAbstractItemView::item {
-                padding: 14px 16px;
-                min-height: 40px;
-                color: #fafafa;
+                padding: 12px 14px;
+                min-height: 38px;
             }
             QComboBox QAbstractItemView::item:hover {
-                background-color: #ff4b4b;
-                color: #ffffff;
+                background-color: #34d399;
             }
         """
 
-        # Год - с контейнером для центрирования
+        # Год
         year_combo = QComboBox()
         year_combo.addItems(['1', '2', '3'])
-        year_combo.setStyleSheet(combo_style)
-        year_combo.setFixedHeight(48)
+        year_combo.setStyleSheet(table_combo_style)
 
         year_container = QWidget()
         year_container.setStyleSheet("background-color: transparent;")
-        year_layout = QVBoxLayout(year_container)
+        year_layout = QHBoxLayout(year_container)
         year_layout.addWidget(year_combo)
-        year_layout.setContentsMargins(6, 6, 6, 6)
+        year_layout.setContentsMargins(6, 0, 6, 0)
         year_layout.setAlignment(Qt.AlignmentFlag.AlignCenter)
         self.table.setCellWidget(row_position, 0, year_container)
 
         # Семестр
         semester_combo = QComboBox()
         semester_combo.addItems(['1', '2'])
-        semester_combo.setStyleSheet(combo_style)
-        semester_combo.setFixedHeight(48)
+        semester_combo.setStyleSheet(table_combo_style)
 
         semester_container = QWidget()
         semester_container.setStyleSheet("background-color: transparent;")
-        semester_layout = QVBoxLayout(semester_container)
+        semester_layout = QHBoxLayout(semester_container)
         semester_layout.addWidget(semester_combo)
-        semester_layout.setContentsMargins(6, 6, 6, 6)
+        semester_layout.setContentsMargins(6, 0, 6, 0)
         semester_layout.setAlignment(Qt.AlignmentFlag.AlignCenter)
         self.table.setCellWidget(row_position, 1, semester_container)
 
         # Тип
         type_combo = QComboBox()
         type_combo.addItems(['Т', 'П', 'ПА', 'ГИА', 'К'])
-        type_combo.setStyleSheet(combo_style)
-        type_combo.setFixedHeight(48)
+        type_combo.setStyleSheet(table_combo_style)
 
         type_container = QWidget()
         type_container.setStyleSheet("background-color: transparent;")
-        type_layout = QVBoxLayout(type_container)
+        type_layout = QHBoxLayout(type_container)
         type_layout.addWidget(type_combo)
-        type_layout.setContentsMargins(6, 6, 6, 6)
+        type_layout.setContentsMargins(6, 0, 6, 0)
         type_layout.setAlignment(Qt.AlignmentFlag.AlignCenter)
         self.table.setCellWidget(row_position, 2, type_container)
 
@@ -823,12 +909,10 @@ class MainWindow(QMainWindow):
         weeks_item.setTextAlignment(Qt.AlignmentFlag.AlignCenter | Qt.AlignmentFlag.AlignVCenter)
         font = QFont()
         font.setPointSize(16)
-        font.setWeight(QFont.Weight.Normal)
         weeks_item.setFont(font)
         self.table.setItem(row_position, 3, weeks_item)
 
-        # Устанавливаем высоту строки (увеличена для полного отображения)
-        self.table.setRowHeight(row_position, 80)
+        self.table.setRowHeight(row_position, 82)
 
     def remove_row(self):
         current_row = self.table.currentRow()
@@ -838,46 +922,48 @@ class MainWindow(QMainWindow):
     def update_table(self):
         self.table.setRowCount(0)
 
-        combo_style = """
+        # Стиль для комбобоксов в таблице
+        table_combo_style = """
             QComboBox {
-                padding: 14px 18px;
+                padding: 11px 16px;
                 border: 1px solid #464a5e;
                 border-radius: 6px;
                 background-color: #262730;
                 font-size: 16px;
                 color: #fafafa;
-                font-weight: 400;
             }
             QComboBox:hover {
-                border-color: #ff4b4b;
+                border-color: #34d399;
+                border-width: 2px;
+                background-color: #2d3038;
             }
             QComboBox::drop-down {
                 border: none;
-                width: 32px;
+                width: 28px;
             }
             QComboBox::down-arrow {
                 image: none;
                 border-left: 5px solid transparent;
                 border-right: 5px solid transparent;
-                border-top: 8px solid #a3a8b4;
+                border-top: 7px solid #a3a8b4;
                 margin-right: 10px;
+            }
+            QComboBox:hover::down-arrow {
+                border-top-color: #34d399;
             }
             QComboBox QAbstractItemView {
                 background-color: #262730;
                 border: 1px solid #464a5e;
-                selection-background-color: #ff4b4b;
+                selection-background-color: #2d8659;
                 selection-color: #ffffff;
-                outline: none;
                 font-size: 16px;
             }
             QComboBox QAbstractItemView::item {
-                padding: 14px 16px;
-                min-height: 40px;
-                color: #fafafa;
+                padding: 12px 14px;
+                min-height: 38px;
             }
             QComboBox QAbstractItemView::item:hover {
-                background-color: #ff4b4b;
-                color: #ffffff;
+                background-color: #34d399;
             }
         """
 
@@ -885,18 +971,17 @@ class MainWindow(QMainWindow):
             row_position = self.table.rowCount()
             self.table.insertRow(row_position)
 
-            # Год - с контейнером для центрирования
+            # Год
             year_combo = QComboBox()
             year_combo.addItems(['1', '2', '3'])
             year_combo.setCurrentText(str(data['Год']))
-            year_combo.setStyleSheet(combo_style)
-            year_combo.setFixedHeight(48)
+            year_combo.setStyleSheet(table_combo_style)
 
             year_container = QWidget()
             year_container.setStyleSheet("background-color: transparent;")
-            year_layout = QVBoxLayout(year_container)
+            year_layout = QHBoxLayout(year_container)
             year_layout.addWidget(year_combo)
-            year_layout.setContentsMargins(4, 0, 4, 0)
+            year_layout.setContentsMargins(6, 0, 6, 0)
             year_layout.setAlignment(Qt.AlignmentFlag.AlignCenter)
             self.table.setCellWidget(row_position, 0, year_container)
 
@@ -904,14 +989,13 @@ class MainWindow(QMainWindow):
             semester_combo = QComboBox()
             semester_combo.addItems(['1', '2'])
             semester_combo.setCurrentText(str(data['Семестр']))
-            semester_combo.setStyleSheet(combo_style)
-            semester_combo.setFixedHeight(48)
+            semester_combo.setStyleSheet(table_combo_style)
 
             semester_container = QWidget()
             semester_container.setStyleSheet("background-color: transparent;")
-            semester_layout = QVBoxLayout(semester_container)
+            semester_layout = QHBoxLayout(semester_container)
             semester_layout.addWidget(semester_combo)
-            semester_layout.setContentsMargins(4, 0, 4, 0)
+            semester_layout.setContentsMargins(6, 0, 6, 0)
             semester_layout.setAlignment(Qt.AlignmentFlag.AlignCenter)
             self.table.setCellWidget(row_position, 1, semester_container)
 
@@ -919,14 +1003,13 @@ class MainWindow(QMainWindow):
             type_combo = QComboBox()
             type_combo.addItems(['Т', 'П', 'ПА', 'ГИА', 'К'])
             type_combo.setCurrentText(data['Тип'])
-            type_combo.setStyleSheet(combo_style)
-            type_combo.setFixedHeight(48)
+            type_combo.setStyleSheet(table_combo_style)
 
             type_container = QWidget()
             type_container.setStyleSheet("background-color: transparent;")
-            type_layout = QVBoxLayout(type_container)
+            type_layout = QHBoxLayout(type_container)
             type_layout.addWidget(type_combo)
-            type_layout.setContentsMargins(4, 0, 4, 0)
+            type_layout.setContentsMargins(6, 0, 6, 0)
             type_layout.setAlignment(Qt.AlignmentFlag.AlignCenter)
             self.table.setCellWidget(row_position, 2, type_container)
 
@@ -935,12 +1018,10 @@ class MainWindow(QMainWindow):
             weeks_item.setTextAlignment(Qt.AlignmentFlag.AlignCenter | Qt.AlignmentFlag.AlignVCenter)
             font = QFont()
             font.setPointSize(16)
-            font.setWeight(QFont.Weight.Normal)
             weeks_item.setFont(font)
             self.table.setItem(row_position, 3, weeks_item)
 
-            # Устанавливаем высоту строки
-            self.table.setRowHeight(row_position, 72)
+            self.table.setRowHeight(row_position, 82)
 
     def get_table_data(self):
         data = []
@@ -1000,11 +1081,9 @@ class MainWindow(QMainWindow):
                     item.setTextAlignment(Qt.AlignmentFlag.AlignCenter | Qt.AlignmentFlag.AlignVCenter)
                     font = QFont()
                     font.setPointSize(16)
-                    font.setWeight(QFont.Weight.Normal)
                     item.setFont(font)
                     self.preview_table.setItem(row_position, col, item)
 
-                # Устанавливаем высоту строки
                 self.preview_table.setRowHeight(row_position, 60)
 
             self.preview_section.setVisible(True)
