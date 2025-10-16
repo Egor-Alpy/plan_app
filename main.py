@@ -1,18 +1,15 @@
-import streamlit as st
-import pandas as pd
+import sys
 from datetime import datetime, timedelta
 import calendar
 from openpyxl import Workbook
 from openpyxl.styles import Font, PatternFill, Border, Side, Alignment
 from openpyxl.utils import get_column_letter
-import io
-
-# Настройка страницы
-st.set_page_config(
-    page_title="Учебный график",
-    page_icon="📅",
-    layout="wide"
-)
+from PyQt6.QtWidgets import (QApplication, QMainWindow, QWidget, QVBoxLayout,
+                             QHBoxLayout, QPushButton, QLabel, QComboBox,
+                             QTableWidget, QTableWidgetItem, QMessageBox,
+                             QFileDialog, QHeaderView, QFrame, QScrollArea)
+from PyQt6.QtCore import Qt
+from PyQt6.QtGui import QFont
 
 
 class EducationalScheduleApp:
@@ -70,13 +67,13 @@ class EducationalScheduleApp:
 
         return schedule_days, current_date
 
-    def generate_schedule(self, periods_df, start_year):
+    def generate_schedule(self, periods_data, start_year):
         start_date = datetime(start_year, 9, 1)
         current_date = self.get_monday_of_week(start_date)
 
         generated_schedule = []
 
-        for _, row in periods_df.iterrows():
+        for row in periods_data:
             year = int(row['Год'])
             semester = int(row['Семестр'])
             activity_type = row['Тип']
@@ -292,129 +289,765 @@ class EducationalScheduleApp:
             ws.column_dimensions[col_letter].width = 20
 
 
-# Основное приложение
-def main():
-    st.title("Учебный график")
+class MainWindow(QMainWindow):
+    def __init__(self):
+        super().__init__()
+        self.app = EducationalScheduleApp()
+        self.periods_data = []
+        self.generated_schedule = None
+        self.start_year = 2025
+        self.program_type = "Ординатура (2 года)"
 
-    app = EducationalScheduleApp()
+        self.init_ui()
+        self.apply_styles()
 
-    # Настройки в верхней части
-    col1, col2, col3, col4 = st.columns([2, 2, 2, 2])
+    def init_ui(self):
+        self.setWindowTitle('Учебный график')
+        self.setGeometry(100, 100, 1500, 900)
 
-    with col1:
-        program_type = st.selectbox("Тип программы", ["Ординатура (2 года)", "Аспирантура (3 года)"])
+        # Центральный виджет
+        central_widget = QWidget()
+        self.setCentralWidget(central_widget)
+        main_layout = QVBoxLayout(central_widget)
+        main_layout.setSpacing(0)
+        main_layout.setContentsMargins(0, 0, 0, 0)
 
-    with col2:
-        start_year = st.selectbox("Начальный год", [2025, 2026, 2027])
+        # Скролл область
+        scroll = QScrollArea()
+        scroll.setWidgetResizable(True)
+        scroll.setFrameShape(QFrame.Shape.NoFrame)
 
-    with col3:
-        if st.button("Пример ординатуры"):
-            st.session_state.periods_data = [
-                {"Год": 1, "Семестр": 1, "Тип": "Т", "Недели": 10},
-                {"Год": 1, "Семестр": 1, "Тип": "П", "Недели": 12},
-                {"Год": 1, "Семестр": 1, "Тип": "ПА", "Недели": 1},
-                {"Год": 1, "Семестр": 2, "Тип": "Т", "Недели": 4},
-                {"Год": 1, "Семестр": 2, "Тип": "П", "Недели": 16},
-                {"Год": 1, "Семестр": 2, "Тип": "ПА", "Недели": 1},
-                {"Год": 1, "Семестр": 2, "Тип": "К", "Недели": 6},
-                {"Год": 2, "Семестр": 1, "Тип": "Т", "Недели": 10},
-                {"Год": 2, "Семестр": 1, "Тип": "П", "Недели": 12},
-                {"Год": 2, "Семестр": 1, "Тип": "ПА", "Недели": 1},
-                {"Год": 2, "Семестр": 2, "Тип": "Т", "Недели": 9},
-                {"Год": 2, "Семестр": 2, "Тип": "П", "Недели": 8},
-                {"Год": 2, "Семестр": 2, "Тип": "ПА", "Недели": 1},
-                {"Год": 2, "Семестр": 2, "Тип": "ГИА", "Недели": 2},
-                {"Год": 2, "Семестр": 2, "Тип": "К", "Недели": 6}
-            ]
+        scroll_content = QWidget()
+        scroll_content.setStyleSheet("background-color: #0e1117;")
+        content_layout = QVBoxLayout(scroll_content)
+        content_layout.setSpacing(0)
+        content_layout.setContentsMargins(0, 0, 0, 0)
 
-    with col4:
-        if st.button("Очистить"):
-            st.session_state.periods_data = []
+        # Основной контент с padding
+        content_container = QWidget()
+        content_container.setStyleSheet("background-color: #0e1117;")
+        container_layout = QVBoxLayout(content_container)
+        container_layout.setContentsMargins(50, 40, 50, 50)
+        container_layout.setSpacing(32)
 
-    st.divider()
+        # Заголовок
+        title = QLabel('Учебный график')
+        title.setObjectName("mainTitle")
 
-    # Инициализация данных
-    if 'periods_data' not in st.session_state:
-        st.session_state.periods_data = []
+        subtitle = QLabel('Создание календарного учебного графика')
+        subtitle.setObjectName("subtitle")
 
-    # Редактор периодов
-    st.subheader("Периоды обучения")
+        container_layout.addWidget(title)
+        container_layout.addWidget(subtitle)
+        container_layout.addSpacing(8)
 
-    if st.session_state.periods_data:
-        edited_df = st.data_editor(
-            pd.DataFrame(st.session_state.periods_data),
-            use_container_width=True,
-            num_rows="dynamic",
-            column_config={
-                "Год": st.column_config.SelectboxColumn("Год", options=[1, 2, 3]),
-                "Семестр": st.column_config.SelectboxColumn("Семестр", options=[1, 2]),
-                "Тип": st.column_config.SelectboxColumn("Тип", options=["Т", "П", "ПА", "ГИА", "К"]),
-                "Недели": st.column_config.NumberColumn("Недели", min_value=0.1, max_value=52.0, step=0.1,
-                                                        format="%.1f")
+        # Настройки
+        settings_label = QLabel('Настройки')
+        settings_label.setObjectName("sectionTitle")
+        container_layout.addWidget(settings_label)
+
+        settings_row = QHBoxLayout()
+        settings_row.setSpacing(20)
+
+        # Тип программы
+        program_layout = QVBoxLayout()
+        program_layout.setSpacing(8)
+        program_label = QLabel('Тип программы')
+        program_label.setObjectName("inputLabel")
+        self.program_combo = QComboBox()
+        self.program_combo.addItems(['Ординатура (2 года)', 'Аспирантура (3 года)'])
+        self.program_combo.currentTextChanged.connect(self.on_program_changed)
+        program_layout.addWidget(program_label)
+        program_layout.addWidget(self.program_combo)
+
+        # Начальный год
+        year_layout = QVBoxLayout()
+        year_layout.setSpacing(8)
+        year_label = QLabel('Начальный год')
+        year_label.setObjectName("inputLabel")
+        self.year_combo = QComboBox()
+        self.year_combo.addItems(['2025', '2026', '2027'])
+        self.year_combo.currentTextChanged.connect(self.on_year_changed)
+        year_layout.addWidget(year_label)
+        year_layout.addWidget(self.year_combo)
+
+        settings_row.addLayout(program_layout)
+        settings_row.addLayout(year_layout)
+        settings_row.addStretch()
+
+        container_layout.addLayout(settings_row)
+
+        # Кнопки примера
+        button_row = QHBoxLayout()
+        button_row.setSpacing(12)
+
+        example_btn = QPushButton('Пример ординатуры')
+        example_btn.setObjectName("secondaryButton")
+        example_btn.clicked.connect(self.load_example)
+
+        clear_btn = QPushButton('Очистить')
+        clear_btn.setObjectName("secondaryButton")
+        clear_btn.clicked.connect(self.clear_data)
+
+        button_row.addWidget(example_btn)
+        button_row.addWidget(clear_btn)
+        button_row.addStretch()
+
+        container_layout.addLayout(button_row)
+        container_layout.addSpacing(16)
+
+        # Периоды обучения
+        periods_label = QLabel('Периоды обучения')
+        periods_label.setObjectName("sectionTitle")
+        container_layout.addWidget(periods_label)
+
+        # Таблица
+        self.table = QTableWidget()
+        self.table.setColumnCount(4)
+        self.table.setHorizontalHeaderLabels(['Год', 'Семестр', 'Тип', 'Недели'])
+        self.table.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeMode.Stretch)
+        self.table.verticalHeader().setVisible(False)
+        self.table.verticalHeader().setDefaultSectionSize(72)
+        self.table.setAlternatingRowColors(True)
+        self.table.setMinimumHeight(400)
+        container_layout.addWidget(self.table)
+
+        # Кнопки таблицы
+        table_btn_row = QHBoxLayout()
+        table_btn_row.setSpacing(12)
+
+        add_row_btn = QPushButton('+ Добавить строку')
+        add_row_btn.setObjectName("secondaryButton")
+        add_row_btn.clicked.connect(self.add_row)
+
+        remove_row_btn = QPushButton('− Удалить строку')
+        remove_row_btn.setObjectName("secondaryButton")
+        remove_row_btn.clicked.connect(self.remove_row)
+
+        table_btn_row.addWidget(add_row_btn)
+        table_btn_row.addWidget(remove_row_btn)
+        table_btn_row.addStretch()
+
+        container_layout.addLayout(table_btn_row)
+        container_layout.addSpacing(16)
+
+        # Кнопки действий
+        action_row = QHBoxLayout()
+        action_row.setSpacing(16)
+
+        generate_btn = QPushButton('Сгенерировать график')
+        generate_btn.setObjectName("primaryButton")
+        generate_btn.clicked.connect(self.generate_schedule)
+
+        self.download_btn = QPushButton('Скачать Excel')
+        self.download_btn.setObjectName("downloadButton")
+        self.download_btn.clicked.connect(self.download_excel)
+        self.download_btn.setEnabled(False)
+
+        action_row.addWidget(generate_btn, 1)
+        action_row.addWidget(self.download_btn, 1)
+
+        container_layout.addLayout(action_row)
+
+        # Предварительный просмотр
+        self.preview_section = QWidget()
+        self.preview_section.setStyleSheet("background-color: #0e1117;")
+        preview_layout = QVBoxLayout(self.preview_section)
+        preview_layout.setContentsMargins(0, 32, 0, 0)
+        preview_layout.setSpacing(16)
+
+        preview_label = QLabel('Предварительный просмотр')
+        preview_label.setObjectName("sectionTitle")
+        preview_layout.addWidget(preview_label)
+
+        self.preview_table = QTableWidget()
+        self.preview_table.setColumnCount(7)
+        self.preview_table.setHorizontalHeaderLabels(['Год', 'Семестр', 'Тип', 'Недели', 'Начало', 'Конец', 'Дней'])
+        self.preview_table.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeMode.Stretch)
+        self.preview_table.verticalHeader().setVisible(False)
+        self.preview_table.verticalHeader().setDefaultSectionSize(60)
+        self.preview_table.setAlternatingRowColors(True)
+        self.preview_table.setMinimumHeight(350)
+        preview_layout.addWidget(self.preview_table)
+
+        self.preview_section.setVisible(False)
+        container_layout.addWidget(self.preview_section)
+
+        content_layout.addWidget(content_container)
+
+        scroll.setWidget(scroll_content)
+        main_layout.addWidget(scroll)
+
+    def apply_styles(self):
+        self.setStyleSheet("""
+            QMainWindow {
+                background-color: #0e1117;
             }
+
+            QLabel#mainTitle {
+                font-size: 32px;
+                font-weight: 700;
+                color: #fafafa;
+                margin: 0;
+                padding: 0;
+            }
+
+            QLabel#subtitle {
+                font-size: 16px;
+                color: #a3a8b4;
+                margin-top: 8px;
+                font-weight: 400;
+            }
+
+            QLabel#sectionTitle {
+                font-size: 20px;
+                font-weight: 600;
+                color: #fafafa;
+                margin-bottom: 8px;
+            }
+
+            QLabel#inputLabel {
+                font-size: 14px;
+                font-weight: 600;
+                color: #fafafa;
+            }
+
+            QComboBox {
+                padding: 12px 16px;
+                border: 1px solid #464a5e;
+                border-radius: 8px;
+                background-color: #262730;
+                font-size: 15px;
+                min-width: 240px;
+                color: #fafafa;
+                min-height: 44px;
+                font-weight: 400;
+            }
+
+            QComboBox:hover {
+                border-color: #ff4b4b;
+            }
+
+            QComboBox:focus {
+                border-color: #ff4b4b;
+                outline: none;
+            }
+
+            QComboBox::drop-down {
+                border: none;
+                width: 32px;
+            }
+
+            QComboBox::down-arrow {
+                image: none;
+                border-left: 5px solid transparent;
+                border-right: 5px solid transparent;
+                border-top: 7px solid #a3a8b4;
+                margin-right: 10px;
+            }
+
+            QComboBox QAbstractItemView {
+                background-color: #262730;
+                border: 1px solid #464a5e;
+                selection-background-color: #ff4b4b;
+                selection-color: #ffffff;
+                outline: none;
+                padding: 6px;
+                font-size: 15px;
+                color: #fafafa;
+            }
+
+            QComboBox QAbstractItemView::item {
+                padding: 10px 12px;
+                min-height: 36px;
+                color: #fafafa;
+            }
+
+            QComboBox QAbstractItemView::item:hover {
+                background-color: #ff4b4b;
+                color: #ffffff;
+            }
+
+            QPushButton#primaryButton {
+                padding: 14px 32px;
+                border: none;
+                border-radius: 8px;
+                background-color: #ff4b4b;
+                color: white;
+                font-size: 16px;
+                font-weight: 600;
+                min-height: 52px;
+            }
+
+            QPushButton#primaryButton:hover {
+                background-color: #ff2b2b;
+            }
+
+            QPushButton#primaryButton:pressed {
+                background-color: #e04040;
+            }
+
+            QPushButton#downloadButton {
+                padding: 14px 32px;
+                border: 1px solid #464a5e;
+                border-radius: 8px;
+                background-color: #262730;
+                color: #fafafa;
+                font-size: 16px;
+                font-weight: 600;
+                min-height: 52px;
+            }
+
+            QPushButton#downloadButton:hover {
+                background-color: #31343f;
+                border-color: #ff4b4b;
+            }
+
+            QPushButton#downloadButton:pressed {
+                background-color: #1c1f26;
+            }
+
+            QPushButton#downloadButton:disabled {
+                background-color: #1a1c24;
+                color: #464a5e;
+                border-color: #31343f;
+            }
+
+            QPushButton#secondaryButton {
+                padding: 10px 20px;
+                border: 1px solid #464a5e;
+                border-radius: 8px;
+                background-color: #262730;
+                color: #fafafa;
+                font-size: 15px;
+                font-weight: 500;
+                min-height: 40px;
+            }
+
+            QPushButton#secondaryButton:hover {
+                background-color: #31343f;
+                border-color: #ff4b4b;
+            }
+
+            QPushButton#secondaryButton:pressed {
+                background-color: #1c1f26;
+            }
+
+            QTableWidget {
+                border: 1px solid #31343f;
+                border-radius: 8px;
+                background-color: #1a1c24;
+                gridline-color: #31343f;
+                font-size: 16px;
+                color: #fafafa;
+            }
+
+            QTableWidget::item {
+                padding: 16px;
+                color: #fafafa;
+                background-color: #1a1c24;
+                font-size: 16px;
+                border: none;
+            }
+
+            QTableWidget::item:selected {
+                background-color: #262730;
+                color: #fafafa;
+            }
+
+            QHeaderView::section {
+                background-color: #262730;
+                padding: 16px;
+                border: none;
+                border-bottom: 2px solid #31343f;
+                border-right: 1px solid #31343f;
+                font-weight: 600;
+                font-size: 15px;
+                color: #fafafa;
+            }
+
+            QTableWidget::item:alternate {
+                background-color: #14161d;
+            }
+
+            QScrollArea {
+                border: none;
+                background-color: #0e1117;
+            }
+
+            QScrollBar:vertical {
+                border: none;
+                background: #1a1c24;
+                width: 12px;
+                margin: 0px;
+            }
+
+            QScrollBar::handle:vertical {
+                background: #464a5e;
+                border-radius: 6px;
+                min-height: 30px;
+            }
+
+            QScrollBar::handle:vertical:hover {
+                background: #5a5f75;
+            }
+
+            QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical {
+                height: 0px;
+            }
+        """)
+
+    def on_program_changed(self, text):
+        self.program_type = text
+
+    def on_year_changed(self, text):
+        self.start_year = int(text)
+
+    def load_example(self):
+        self.periods_data = [
+            {"Год": 1, "Семестр": 1, "Тип": "Т", "Недели": 10},
+            {"Год": 1, "Семестр": 1, "Тип": "П", "Недели": 12},
+            {"Год": 1, "Семестр": 1, "Тип": "ПА", "Недели": 1},
+            {"Год": 1, "Семестр": 2, "Тип": "Т", "Недели": 4},
+            {"Год": 1, "Семестр": 2, "Тип": "П", "Недели": 16},
+            {"Год": 1, "Семестр": 2, "Тип": "ПА", "Недели": 1},
+            {"Год": 1, "Семестр": 2, "Тип": "К", "Недели": 6},
+            {"Год": 2, "Семестр": 1, "Тип": "Т", "Недели": 10},
+            {"Год": 2, "Семестр": 1, "Тип": "П", "Недели": 12},
+            {"Год": 2, "Семестр": 1, "Тип": "ПА", "Недели": 1},
+            {"Год": 2, "Семестр": 2, "Тип": "Т", "Недели": 9},
+            {"Год": 2, "Семестр": 2, "Тип": "П", "Недели": 8},
+            {"Год": 2, "Семестр": 2, "Тип": "ПА", "Недели": 1},
+            {"Год": 2, "Семестр": 2, "Тип": "ГИА", "Недели": 2},
+            {"Год": 2, "Семестр": 2, "Тип": "К", "Недели": 6}
+        ]
+        self.update_table()
+
+    def clear_data(self):
+        self.periods_data = []
+        self.update_table()
+        self.preview_section.setVisible(False)
+        self.download_btn.setEnabled(False)
+
+    def add_row(self):
+        row_position = self.table.rowCount()
+        self.table.insertRow(row_position)
+
+        combo_style = """
+            QComboBox {
+                padding: 14px 18px;
+                border: 1px solid #464a5e;
+                border-radius: 6px;
+                background-color: #262730;
+                font-size: 16px;
+                color: #fafafa;
+                font-weight: 400;
+            }
+            QComboBox:hover {
+                border-color: #ff4b4b;
+            }
+            QComboBox::drop-down {
+                border: none;
+                width: 32px;
+            }
+            QComboBox::down-arrow {
+                image: none;
+                border-left: 5px solid transparent;
+                border-right: 5px solid transparent;
+                border-top: 8px solid #a3a8b4;
+                margin-right: 10px;
+            }
+            QComboBox QAbstractItemView {
+                background-color: #262730;
+                border: 1px solid #464a5e;
+                selection-background-color: #ff4b4b;
+                selection-color: #ffffff;
+                outline: none;
+                font-size: 16px;
+            }
+            QComboBox QAbstractItemView::item {
+                padding: 14px 16px;
+                min-height: 40px;
+                color: #fafafa;
+            }
+            QComboBox QAbstractItemView::item:hover {
+                background-color: #ff4b4b;
+                color: #ffffff;
+            }
+        """
+
+        # Год - с контейнером для центрирования
+        year_combo = QComboBox()
+        year_combo.addItems(['1', '2', '3'])
+        year_combo.setStyleSheet(combo_style)
+        year_combo.setFixedHeight(48)
+
+        year_container = QWidget()
+        year_container.setStyleSheet("background-color: transparent;")
+        year_layout = QVBoxLayout(year_container)
+        year_layout.addWidget(year_combo)
+        year_layout.setContentsMargins(6, 6, 6, 6)
+        year_layout.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        self.table.setCellWidget(row_position, 0, year_container)
+
+        # Семестр
+        semester_combo = QComboBox()
+        semester_combo.addItems(['1', '2'])
+        semester_combo.setStyleSheet(combo_style)
+        semester_combo.setFixedHeight(48)
+
+        semester_container = QWidget()
+        semester_container.setStyleSheet("background-color: transparent;")
+        semester_layout = QVBoxLayout(semester_container)
+        semester_layout.addWidget(semester_combo)
+        semester_layout.setContentsMargins(6, 6, 6, 6)
+        semester_layout.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        self.table.setCellWidget(row_position, 1, semester_container)
+
+        # Тип
+        type_combo = QComboBox()
+        type_combo.addItems(['Т', 'П', 'ПА', 'ГИА', 'К'])
+        type_combo.setStyleSheet(combo_style)
+        type_combo.setFixedHeight(48)
+
+        type_container = QWidget()
+        type_container.setStyleSheet("background-color: transparent;")
+        type_layout = QVBoxLayout(type_container)
+        type_layout.addWidget(type_combo)
+        type_layout.setContentsMargins(6, 6, 6, 6)
+        type_layout.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        self.table.setCellWidget(row_position, 2, type_container)
+
+        # Недели
+        weeks_item = QTableWidgetItem('1.0')
+        weeks_item.setTextAlignment(Qt.AlignmentFlag.AlignCenter | Qt.AlignmentFlag.AlignVCenter)
+        font = QFont()
+        font.setPointSize(16)
+        font.setWeight(QFont.Weight.Normal)
+        weeks_item.setFont(font)
+        self.table.setItem(row_position, 3, weeks_item)
+
+        # Устанавливаем высоту строки (увеличена для полного отображения)
+        self.table.setRowHeight(row_position, 80)
+
+    def remove_row(self):
+        current_row = self.table.currentRow()
+        if current_row >= 0:
+            self.table.removeRow(current_row)
+
+    def update_table(self):
+        self.table.setRowCount(0)
+
+        combo_style = """
+            QComboBox {
+                padding: 14px 18px;
+                border: 1px solid #464a5e;
+                border-radius: 6px;
+                background-color: #262730;
+                font-size: 16px;
+                color: #fafafa;
+                font-weight: 400;
+            }
+            QComboBox:hover {
+                border-color: #ff4b4b;
+            }
+            QComboBox::drop-down {
+                border: none;
+                width: 32px;
+            }
+            QComboBox::down-arrow {
+                image: none;
+                border-left: 5px solid transparent;
+                border-right: 5px solid transparent;
+                border-top: 8px solid #a3a8b4;
+                margin-right: 10px;
+            }
+            QComboBox QAbstractItemView {
+                background-color: #262730;
+                border: 1px solid #464a5e;
+                selection-background-color: #ff4b4b;
+                selection-color: #ffffff;
+                outline: none;
+                font-size: 16px;
+            }
+            QComboBox QAbstractItemView::item {
+                padding: 14px 16px;
+                min-height: 40px;
+                color: #fafafa;
+            }
+            QComboBox QAbstractItemView::item:hover {
+                background-color: #ff4b4b;
+                color: #ffffff;
+            }
+        """
+
+        for data in self.periods_data:
+            row_position = self.table.rowCount()
+            self.table.insertRow(row_position)
+
+            # Год - с контейнером для центрирования
+            year_combo = QComboBox()
+            year_combo.addItems(['1', '2', '3'])
+            year_combo.setCurrentText(str(data['Год']))
+            year_combo.setStyleSheet(combo_style)
+            year_combo.setFixedHeight(48)
+
+            year_container = QWidget()
+            year_container.setStyleSheet("background-color: transparent;")
+            year_layout = QVBoxLayout(year_container)
+            year_layout.addWidget(year_combo)
+            year_layout.setContentsMargins(4, 0, 4, 0)
+            year_layout.setAlignment(Qt.AlignmentFlag.AlignCenter)
+            self.table.setCellWidget(row_position, 0, year_container)
+
+            # Семестр
+            semester_combo = QComboBox()
+            semester_combo.addItems(['1', '2'])
+            semester_combo.setCurrentText(str(data['Семестр']))
+            semester_combo.setStyleSheet(combo_style)
+            semester_combo.setFixedHeight(48)
+
+            semester_container = QWidget()
+            semester_container.setStyleSheet("background-color: transparent;")
+            semester_layout = QVBoxLayout(semester_container)
+            semester_layout.addWidget(semester_combo)
+            semester_layout.setContentsMargins(4, 0, 4, 0)
+            semester_layout.setAlignment(Qt.AlignmentFlag.AlignCenter)
+            self.table.setCellWidget(row_position, 1, semester_container)
+
+            # Тип
+            type_combo = QComboBox()
+            type_combo.addItems(['Т', 'П', 'ПА', 'ГИА', 'К'])
+            type_combo.setCurrentText(data['Тип'])
+            type_combo.setStyleSheet(combo_style)
+            type_combo.setFixedHeight(48)
+
+            type_container = QWidget()
+            type_container.setStyleSheet("background-color: transparent;")
+            type_layout = QVBoxLayout(type_container)
+            type_layout.addWidget(type_combo)
+            type_layout.setContentsMargins(4, 0, 4, 0)
+            type_layout.setAlignment(Qt.AlignmentFlag.AlignCenter)
+            self.table.setCellWidget(row_position, 2, type_container)
+
+            # Недели
+            weeks_item = QTableWidgetItem(str(data['Недели']))
+            weeks_item.setTextAlignment(Qt.AlignmentFlag.AlignCenter | Qt.AlignmentFlag.AlignVCenter)
+            font = QFont()
+            font.setPointSize(16)
+            font.setWeight(QFont.Weight.Normal)
+            weeks_item.setFont(font)
+            self.table.setItem(row_position, 3, weeks_item)
+
+            # Устанавливаем высоту строки
+            self.table.setRowHeight(row_position, 72)
+
+    def get_table_data(self):
+        data = []
+        for row in range(self.table.rowCount()):
+            year_container = self.table.cellWidget(row, 0)
+            semester_container = self.table.cellWidget(row, 1)
+            type_container = self.table.cellWidget(row, 2)
+            weeks_item = self.table.item(row, 3)
+
+            if year_container and semester_container and type_container and weeks_item:
+                try:
+                    # Извлекаем комбобоксы из контейнеров
+                    year_combo = year_container.findChild(QComboBox)
+                    semester_combo = semester_container.findChild(QComboBox)
+                    type_combo = type_container.findChild(QComboBox)
+
+                    if year_combo and semester_combo and type_combo:
+                        weeks = float(weeks_item.text())
+                        data.append({
+                            'Год': int(year_combo.currentText()),
+                            'Семестр': int(semester_combo.currentText()),
+                            'Тип': type_combo.currentText(),
+                            'Недели': weeks
+                        })
+                except ValueError:
+                    pass
+        return data
+
+    def generate_schedule(self):
+        periods_data = self.get_table_data()
+
+        if not periods_data:
+            QMessageBox.warning(self, 'Внимание', 'Добавьте периоды обучения')
+            return
+
+        try:
+            self.generated_schedule = self.app.generate_schedule(periods_data, self.start_year)
+
+            # Обновление таблицы предварительного просмотра
+            self.preview_table.setRowCount(0)
+            for period in self.generated_schedule:
+                row_position = self.preview_table.rowCount()
+                self.preview_table.insertRow(row_position)
+
+                items = [
+                    str(period['year']),
+                    str(period['semester']),
+                    period['type'],
+                    f"{period['weeks']:.1f}",
+                    period['start_date'].strftime('%d.%m.%Y'),
+                    period['end_date'].strftime('%d.%m.%Y'),
+                    str(len(period['days']))
+                ]
+
+                for col, text in enumerate(items):
+                    item = QTableWidgetItem(text)
+                    item.setTextAlignment(Qt.AlignmentFlag.AlignCenter | Qt.AlignmentFlag.AlignVCenter)
+                    font = QFont()
+                    font.setPointSize(16)
+                    font.setWeight(QFont.Weight.Normal)
+                    item.setFont(font)
+                    self.preview_table.setItem(row_position, col, item)
+
+                # Устанавливаем высоту строки
+                self.preview_table.setRowHeight(row_position, 60)
+
+            self.preview_section.setVisible(True)
+            self.download_btn.setEnabled(True)
+
+            QMessageBox.information(self, 'Успех', f'График готов!\nСоздано периодов: {len(self.generated_schedule)}')
+
+        except Exception as e:
+            QMessageBox.critical(self, 'Ошибка', f'Ошибка при генерации графика:\n{str(e)}')
+
+    def download_excel(self):
+        if not self.generated_schedule:
+            QMessageBox.warning(self, 'Внимание', 'Сначала сгенерируйте график')
+            return
+
+        filename, _ = QFileDialog.getSaveFileName(
+            self,
+            'Сохранить Excel файл',
+            f'график_{self.start_year}-{self.start_year + 1}.xlsx',
+            'Excel Files (*.xlsx)'
         )
-        st.session_state.periods_data = edited_df.to_dict('records')
-    else:
-        st.info("Добавьте периоды обучения или загрузите пример")
 
-    st.divider()
-
-    # Кнопки действий
-    col1, col2 = st.columns(2)
-
-    with col1:
-        if st.button("Сгенерировать график", type="primary"):
-            if st.session_state.periods_data:
-                with st.spinner("Генерация..."):
-                    periods_df = pd.DataFrame(st.session_state.periods_data)
-                    generated_schedule = app.generate_schedule(periods_df, start_year)
-                    st.session_state.generated_schedule = generated_schedule
-                    st.session_state.start_year = start_year
-                    st.session_state.program_type = program_type
-
-                st.success(f"График готов! Создано периодов: {len(generated_schedule)}")
-            else:
-                st.error("Добавьте периоды обучения")
-
-    with col2:
-        if 'generated_schedule' in st.session_state:
-            wb = app.create_excel_file(
-                st.session_state.generated_schedule,
-                st.session_state.start_year,
-                st.session_state.program_type
-            )
-
-            buffer = io.BytesIO()
-            wb.save(buffer)
-            buffer.seek(0)
-
-            st.download_button(
-                label="Скачать Excel",
-                data=buffer,
-                file_name=f"график_{st.session_state.start_year}-{st.session_state.start_year + 1}.xlsx",
-                mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-            )
-        else:
-            st.button("Скачать Excel", disabled=True)
-
-    # Предварительный просмотр
-    if 'generated_schedule' in st.session_state:
-        st.subheader("Предварительный просмотр")
-
-        preview_data = []
-        for period in st.session_state.generated_schedule:
-            preview_data.append({
-                "Год": period['year'],
-                "Семестр": period['semester'],
-                "Тип": period['type'],
-                "Недели": f"{period['weeks']:.1f}",
-                "Начало": period['start_date'].strftime('%d.%m.%Y'),
-                "Конец": period['end_date'].strftime('%d.%m.%Y'),
-                "Дней": len(period['days'])
-            })
-
-        st.dataframe(pd.DataFrame(preview_data), use_container_width=True, hide_index=True)
+        if filename:
+            try:
+                wb = self.app.create_excel_file(self.generated_schedule, self.start_year, self.program_type)
+                wb.save(filename)
+                QMessageBox.information(self, 'Успех', f'Файл успешно сохранен:\n{filename}')
+            except Exception as e:
+                QMessageBox.critical(self, 'Ошибка', f'Ошибка при сохранении файла:\n{str(e)}')
 
 
-if __name__ == "__main__":
+def main():
+    app = QApplication(sys.argv)
+
+    # Установка шрифта
+    font = QFont()
+    font.setPointSize(10)
+    app.setFont(font)
+
+    window = MainWindow()
+    window.show()
+    sys.exit(app.exec())
+
+
+if __name__ == '__main__':
     main()
