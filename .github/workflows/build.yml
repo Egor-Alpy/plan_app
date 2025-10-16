@@ -27,31 +27,49 @@ jobs:
 
     - name: Build Windows executable
       run: |
-        pyinstaller --name="УчебныйГрафик" --onefile --windowed --noconsole main.py
+        pyinstaller --name="УчебныйГрафик" --onefile --windowed --noconsole --icon=icon.ico main.py
 
     - name: Create distribution package
       run: |
         mkdir УчебныйГрафик_v1.0
         copy dist\УчебныйГрафик.exe УчебныйГрафик_v1.0\
-        echo # Учебный график - Инструкция > УчебныйГрафик_v1.0\README.txt
-        echo. >> УчебныйГрафик_v1.0\README.txt
-        echo ## Запуск приложения >> УчебныйГрафик_v1.0\README.txt
-        echo Дважды кликните на УчебныйГрафик.exe >> УчебныйГрафик_v1.0\README.txt
-        echo. >> УчебныйГрафик_v1.0\README.txt
-        echo ## Быстрый старт >> УчебныйГрафик_v1.0\README.txt
-        echo 1. Выберите тип программы и начальный год >> УчебныйГрафик_v1.0\README.txt
-        echo 2. Нажмите Пример ординатуры для загрузки примера >> УчебныйГрафик_v1.0\README.txt
-        echo 3. Или добавьте периоды вручную >> УчебныйГрафик_v1.0\README.txt
-        echo 4. Нажмите Сгенерировать график >> УчебныйГрафик_v1.0\README.txt
-        echo 5. Нажмите Скачать Excel >> УчебныйГрафик_v1.0\README.txt
-        echo. >> УчебныйГрафик_v1.0\README.txt
-        echo Разработчики: Бахмутов Е., Клюев П. >> УчебныйГрафик_v1.0\README.txt
+      shell: cmd
+
+    - name: Create README file
+      run: |
+        @"
+        # Учебный график - Инструкция
+
+        ## Запуск приложения
+        Дважды кликните на УчебныйГрафик.exe
+
+        ## Быстрый старт
+        1. Выберите тип программы и начальный год
+        2. Нажмите 'Пример ординатуры' для загрузки примера
+        3. Или добавьте периоды вручную
+        4. Нажмите 'Сгенерировать график'
+        5. Нажмите 'Скачать Excel'
+
+        ## Типы занятий
+        Т - Теоретическая подготовка
+        П - Практика
+        ПА - Промежуточная аттестация
+        ГИА - Государственная итоговая аттестация
+        К - Каникулы
+
+        ## Разработчики
+        Бахмутов Е., Клюев П.
+
+        Версия: 1.0 (2025)
+        "@ | Out-File -FilePath "УчебныйГрафик_v1.0\README.txt" -Encoding UTF8
+      shell: pwsh
 
     - name: Create ZIP archive
       run: |
-        powershell Compress-Archive -Path УчебныйГрафик_v1.0 -DestinationPath УчебныйГрафик_Windows.zip
+        Compress-Archive -Path УчебныйГрафик_v1.0 -DestinationPath УчебныйГрафик_Windows.zip
+      shell: pwsh
 
-    - name: Upload artifact
+    - name: Upload ZIP artifact
       uses: actions/upload-artifact@v4
       with:
         name: windows-executable
