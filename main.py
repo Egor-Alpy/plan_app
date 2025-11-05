@@ -98,195 +98,335 @@ class EducationalScheduleApp:
 
     def create_excel_file(self, generated_schedule, start_year, program_type):
         wb = Workbook()
+        ws = wb.active
+        ws.title = "Учебный график"
+
         program_years = 2 if "Ординатура" in program_type else 3
 
-        # Стили
-        header_font = Font(bold=True)
-        thin_border = Border(left=Side(style='thin'), right=Side(style='thin'),
-                             top=Side(style='thin'), bottom=Side(style='thin'))
+        # ===== СТИЛИ =====
+        # Шрифты
+        header_font = Font(name='Calibri', size=11, bold=True, color='FFFFFF')
+        title_font = Font(name='Calibri', size=16, bold=True, color='1F4E78')
+        year_title_font = Font(name='Calibri', size=14, bold=True, color='FFFFFF')
+        legend_header_font = Font(name='Calibri', size=12, bold=True, color='1F4E78')
+        legend_font = Font(name='Calibri', size=10, color='000000')
+        data_font = Font(name='Calibri', size=10, color='000000')
 
+        # Границы
+        thin_border = Border(
+            left=Side(style='thin', color='BFBFBF'),
+            right=Side(style='thin', color='BFBFBF'),
+            top=Side(style='thin', color='BFBFBF'),
+            bottom=Side(style='thin', color='BFBFBF')
+        )
+
+        thick_border = Border(
+            left=Side(style='medium', color='1F4E78'),
+            right=Side(style='medium', color='1F4E78'),
+            top=Side(style='medium', color='1F4E78'),
+            bottom=Side(style='medium', color='1F4E78')
+        )
+
+        # Цвета для типов занятий (расширенная палитра)
         activity_fills = {
-            'Т': PatternFill(start_color="90EE90", end_color="90EE90", fill_type="solid"),
-            'П': PatternFill(start_color="87CEEB", end_color="87CEEB", fill_type="solid"),
-            'ПА': PatternFill(start_color="FFE4B5", end_color="FFE4B5", fill_type="solid"),
-            'ГИА': PatternFill(start_color="DDA0DD", end_color="DDA0DD", fill_type="solid"),
-            'К': PatternFill(start_color="F0E68C", end_color="F0E68C", fill_type="solid")
+            'Т': PatternFill(start_color="D4EDDA", end_color="D4EDDA", fill_type="solid"),  # Теория - зелено-мятный
+            'Э': PatternFill(start_color="FFF3CD", end_color="FFF3CD", fill_type="solid"),  # Экзамены - кремовый
+            'П': PatternFill(start_color="CCE5FF", end_color="CCE5FF", fill_type="solid"),  # Практика - голубой
+            'У': PatternFill(start_color="E3F2FD", end_color="E3F2FD", fill_type="solid"),
+            # Учебная практика - светло-голубой
+            'ПА': PatternFill(start_color="FFE4CC", end_color="FFE4CC", fill_type="solid"),
+            # Промежуточная аттестация - персиковый
+            'ГИА': PatternFill(start_color="E2D5F1", end_color="E2D5F1", fill_type="solid"),  # ГИА - лавандовый
+            'Г': PatternFill(start_color="DDA0DD", end_color="DDA0DD", fill_type="solid"),  # Гос. экзамен - сливовый
+            'Д': PatternFill(start_color="F0E68C", end_color="F0E68C", fill_type="solid"),  # Защита ВКР - хаки
+            'К': PatternFill(start_color="FFE4E1", end_color="FFE4E1", fill_type="solid"),  # Каникулы - розовый
         }
 
-        weekend_fill = PatternFill(start_color="E6E6FA", end_color="E6E6FA", fill_type="solid")
-        holiday_fill = PatternFill(start_color="FFB6C1", end_color="FFB6C1", fill_type="solid")
+        # Дополнительные цвета
+        weekend_fill = PatternFill(start_color="F5F5F5", end_color="F5F5F5", fill_type="solid")
+        holiday_fill = PatternFill(start_color="FFE7E7", end_color="FFE7E7", fill_type="solid")
+        header_fill = PatternFill(start_color="5B9BD5", end_color="5B9BD5", fill_type="solid")
+        month_fill = PatternFill(start_color="A9D08E", end_color="A9D08E", fill_type="solid")
+        year_header_fill = PatternFill(start_color="4472C4", end_color="4472C4", fill_type="solid")
+        legend_header_fill = PatternFill(start_color="E7E6E6", end_color="E7E6E6", fill_type="solid")
 
-        # Создать листы для каждого года
+        current_row = 1
+
+        # ===== ГЛАВНЫЙ ЗАГОЛОВОК =====
+        ws.merge_cells(f'A{current_row}:AZ{current_row}')
+        ws[f'A{current_row}'] = f"КАЛЕНДАРНЫЙ УЧЕБНЫЙ ГРАФИК {start_year}-{start_year + program_years} г."
+        ws[f'A{current_row}'].font = title_font
+        ws[f'A{current_row}'].alignment = Alignment(horizontal='center', vertical='center')
+        ws[f'A{current_row}'].fill = legend_header_fill
+        ws[f'A{current_row}'].border = thick_border
+        ws.row_dimensions[current_row].height = 30
+        current_row += 1
+
+        # ===== ЛЕГЕНДА =====
+        current_row += 1  # Пустая строка
+
+        # Заголовок легенды
+        ws.merge_cells(f'A{current_row}:F{current_row}')
+        ws[f'A{current_row}'] = "УСЛОВНЫЕ ОБОЗНАЧЕНИЯ"
+        ws[f'A{current_row}'].font = legend_header_font
+        ws[f'A{current_row}'].alignment = Alignment(horizontal='center', vertical='center')
+        ws[f'A{current_row}'].fill = legend_header_fill
+        ws[f'A{current_row}'].border = thick_border
+        ws.row_dimensions[current_row].height = 25
+        current_row += 1
+
+        # Легенда с описаниями
+        legend_items = [
+            ('Т', 'Теоретическое обучение', activity_fills.get('Т')),
+            ('Э', 'Экзаменационная сессия', activity_fills.get('Э')),
+            ('П', 'Практика (производственная, преддипломная)', activity_fills.get('П')),
+            ('У', 'Учебная практика', activity_fills.get('У')),
+            ('ПА', 'Промежуточная аттестация', activity_fills.get('ПА')),
+            ('ГИА', 'Государственная итоговая аттестация', activity_fills.get('ГИА')),
+            ('Г', 'Подготовка к сдаче и сдача гос. экзамена', activity_fills.get('Г')),
+            ('Д', 'Подготовка и защита выпускной квалификационной работы', activity_fills.get('Д')),
+            ('К', 'Каникулы', activity_fills.get('К')),
+            ('*', 'Нерабочие праздничные дни', holiday_fill),
+        ]
+
+        for symbol, description, fill in legend_items:
+            # Символ
+            ws[f'A{current_row}'] = symbol
+            ws[f'A{current_row}'].font = Font(name='Calibri', size=11, bold=True, color='000000')
+            ws[f'A{current_row}'].alignment = Alignment(horizontal='center', vertical='center')
+            ws[f'A{current_row}'].fill = fill
+            ws[f'A{current_row}'].border = thin_border
+
+            # Описание
+            ws.merge_cells(f'B{current_row}:F{current_row}')
+            ws[f'B{current_row}'] = description
+            ws[f'B{current_row}'].font = legend_font
+            ws[f'B{current_row}'].alignment = Alignment(horizontal='left', vertical='center')
+            ws[f'B{current_row}'].border = thin_border
+
+            ws.row_dimensions[current_row].height = 22
+            current_row += 1
+
+        current_row += 1  # Пустая строка после легенды
+
+        # ===== КАЛЕНДАРИ ДЛЯ КАЖДОГО ГОДА =====
         for academic_year in range(program_years):
             actual_year = start_year + academic_year
 
-            if academic_year == 0:
-                ws = wb.active
-                ws.title = f"{actual_year}-{actual_year + 1}"
-            else:
-                ws = wb.create_sheet(f"{actual_year}-{actual_year + 1}")
+            # Заголовок года
+            current_row += 1
+            ws.merge_cells(f'A{current_row}:AZ{current_row}')
+            ws[f'A{current_row}'] = f"УЧЕБНЫЙ ГОД {actual_year}-{actual_year + 1}"
+            ws[f'A{current_row}'].font = year_title_font
+            ws[f'A{current_row}'].alignment = Alignment(horizontal='center', vertical='center')
+            ws[f'A{current_row}'].fill = year_header_fill
+            ws[f'A{current_row}'].border = thick_border
+            ws.row_dimensions[current_row].height = 28
+            current_row += 1
 
-            self.create_academic_year_calendar(ws, actual_year, header_font,
-                                               weekend_fill, holiday_fill, activity_fills,
-                                               thin_border, generated_schedule)
+            current_row += 1  # Пустая строка
 
-        # Лист с обозначениями
-        legend_ws = wb.create_sheet("Обозначения")
-        self.create_legend_sheet(legend_ws, header_font, activity_fills,
-                                 weekend_fill, holiday_fill, thin_border)
+            # Создаем календарь для года
+            current_row = self.create_horizontal_calendar(
+                ws, actual_year, generated_schedule,
+                activity_fills, weekend_fill, holiday_fill,
+                thin_border, header_font, header_fill,
+                month_fill, data_font, current_row
+            )
+
+            current_row += 2  # Две пустые строки между годами
+
+        # Настройка размеров колонок
+        ws.column_dimensions['A'].width = 6
+        for col_idx in range(2, 60):
+            ws.column_dimensions[get_column_letter(col_idx)].width = 4.5
+
+        # Ширина для легенды
+        ws.column_dimensions['B'].width = 50
+        ws.column_dimensions['C'].width = 10
+        ws.column_dimensions['D'].width = 10
+        ws.column_dimensions['E'].width = 10
+        ws.column_dimensions['F'].width = 10
 
         return wb
 
-    def create_academic_year_calendar(self, ws, start_year, header_font,
-                                      weekend_fill, holiday_fill, activity_fills,
-                                      thin_border, generated_schedule):
+    def create_horizontal_calendar(self, ws, start_year, generated_schedule,
+                                   activity_fills, weekend_fill, holiday_fill,
+                                   thin_border, header_font, header_fill,
+                                   month_fill, data_font, start_row):
+        """
+        ГОРИЗОНТАЛЬНЫЙ КАЛЕНДАРЬ С УЛУЧШЕННЫМ ФОРМАТИРОВАНИЕМ
+        """
+        current_row = start_row
 
-        # Заголовок
-        ws.merge_cells('A1:AH1')
-        ws['A1'] = f"Календарный учебный график {start_year}-{start_year + 1} г."
-        ws['A1'].font = Font(size=16, bold=True)
-        ws['A1'].alignment = Alignment(horizontal='center')
+        # 1. Генерируем недели учебного года
+        start_date = datetime(start_year, 9, 1)
+        end_date = datetime(start_year + 1, 8, 31)
+        first_monday = self.get_monday_of_week(start_date)
 
-        # Месяцы учебного года (сентябрь-август)
-        academic_months = [(start_year, m) for m in range(9, 13)] + [(start_year + 1, m) for m in range(1, 9)]
+        # Массив всех недель
+        all_weeks = []
+        current_date = first_monday
+        while current_date <= end_date:
+            week_dates = [current_date + timedelta(days=i) for i in range(7)]
+            all_weeks.append(week_dates)
+            current_date += timedelta(days=7)
 
-        # Строка 2 - названия месяцев
-        current_col = 2
+        # 2. Строка "Мес" и месяцы
+        ws[f'A{current_row}'] = 'Месяц'
+        ws[f'A{current_row}'].font = header_font
+        ws[f'A{current_row}'].fill = header_fill
+        ws[f'A{current_row}'].alignment = Alignment(horizontal='center', vertical='center')
+        ws[f'A{current_row}'].border = thin_border
+
+        # Определяем колонки для каждого месяца
+        month_columns = {}
+        for week_idx, week_dates in enumerate(all_weeks):
+            col = week_idx + 2
+            monday = week_dates[0]
+            if start_date <= monday <= end_date:
+                month_key = (monday.year, monday.month)
+                if month_key not in month_columns:
+                    month_columns[month_key] = []
+                month_columns[month_key].append(col)
+
+        # Пишем месяцы
+        academic_months = [(start_year, m) for m in range(9, 13)] + \
+                          [(start_year + 1, m) for m in range(1, 9)]
 
         for year, month in academic_months:
-            month_name = self.month_names_ru[month]
-            cal = calendar.monthcalendar(year, month)
-            month_weeks = len(cal)
+            month_key = (year, month)
+            if month_key in month_columns:
+                cols = sorted(month_columns[month_key])
+                start_col = cols[0]
+                end_col = cols[-1]
 
-            # Заголовок месяца
-            if month_weeks > 1:
-                ws.merge_cells(f'{get_column_letter(current_col)}2:{get_column_letter(current_col + month_weeks - 1)}2')
+                cell = ws.cell(row=current_row, column=start_col)
+                cell.value = self.month_names_ru[month]
+                cell.font = Font(name='Calibri', size=10, bold=True, color='FFFFFF')
+                cell.fill = month_fill
+                cell.alignment = Alignment(horizontal='center', vertical='center')
+                cell.border = thin_border
 
-            cell = ws.cell(row=2, column=current_col)
-            cell.value = month_name
-            cell.font = header_font
-            cell.alignment = Alignment(horizontal='center')
-            cell.border = thin_border
+                if start_col != end_col:
+                    ws.merge_cells(
+                        f'{get_column_letter(start_col)}{current_row}:{get_column_letter(end_col)}{current_row}')
 
-            current_col += month_weeks
+        ws.row_dimensions[current_row].height = 20
+        current_row += 1
 
-        # Дни недели в первой колонке
+        # 3. Дни недели с числами (7 строк)
         days_of_week = ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Вс']
 
-        ws['A2'] = 'Мес'
-        ws['A2'].font = header_font
-        ws['A2'].alignment = Alignment(horizontal='center')
-        ws['A2'].border = thin_border
+        for day_idx, day_name in enumerate(days_of_week):
+            ws[f'A{current_row}'] = day_name
+            ws[f'A{current_row}'].font = header_font
+            ws[f'A{current_row}'].fill = header_fill
+            ws[f'A{current_row}'].alignment = Alignment(horizontal='center', vertical='center')
+            ws[f'A{current_row}'].border = thin_border
 
-        for row_idx, day_name in enumerate(days_of_week, 3):
-            cell = ws['A{}'.format(row_idx)]
-            cell.value = day_name
-            cell.font = header_font
-            cell.alignment = Alignment(horizontal='center')
-            cell.border = thin_border
+            for week_idx, week_dates in enumerate(all_weeks):
+                col = week_idx + 2
+                date = week_dates[day_idx]
 
-        ws['A10'] = 'Нед'
-        ws['A10'].font = header_font
-        ws['A10'].alignment = Alignment(horizontal='center')
-        ws['A10'].border = thin_border
+                cell = ws.cell(row=current_row, column=col)
 
-        # Заполняем календарную сетку
-        current_col = 2
-        week_number = 1
-
-        for year, month in academic_months:
-            cal = calendar.monthcalendar(year, month)
-
-            for week_idx, week in enumerate(cal):
-                col = current_col + week_idx
-
-                # Номер недели
-                ws.cell(row=10, column=col).value = week_number
-                ws.cell(row=10, column=col).alignment = Alignment(horizontal='center')
-                ws.cell(row=10, column=col).border = thin_border
-                week_number += 1
-
-                # Дни недели
-                for day_idx, day in enumerate(week):
-                    row = 3 + day_idx
-                    cell = ws.cell(row=row, column=col)
+                if start_date <= date <= end_date:
+                    cell.value = date.day
+                    cell.font = data_font
+                    cell.alignment = Alignment(horizontal='center', vertical='center')
                     cell.border = thin_border
 
-                    if day == 0:
-                        cell.value = ""
-                        cell.fill = PatternFill(start_color="F5F5F5", end_color="F5F5F5", fill_type="solid")
+                    if self.is_holiday(date):
+                        cell.fill = holiday_fill
+                        cell.font = Font(name='Calibri', size=10, bold=True, color='C65911')
+                    elif date.weekday() >= 5:
+                        cell.fill = weekend_fill
+                else:
+                    cell.value = ""
+                    cell.fill = PatternFill(start_color="FFFFFF", end_color="FFFFFF", fill_type="solid")
+                    cell.border = thin_border
+
+            ws.row_dimensions[current_row].height = 18
+            current_row += 1
+
+        # 4. Строка "Нед" с номерами недель
+        ws[f'A{current_row}'] = 'Неделя'
+        ws[f'A{current_row}'].font = header_font
+        ws[f'A{current_row}'].fill = header_fill
+        ws[f'A{current_row}'].alignment = Alignment(horizontal='center', vertical='center')
+        ws[f'A{current_row}'].border = thin_border
+
+        for week_idx in range(len(all_weeks)):
+            col = week_idx + 2
+            cell = ws.cell(row=current_row, column=col)
+            cell.value = week_idx + 1
+            cell.font = Font(name='Calibri', size=10, bold=True, color='1F4E78')
+            cell.alignment = Alignment(horizontal='center', vertical='center')
+            cell.border = thin_border
+            cell.fill = PatternFill(start_color="F2F2F2", end_color="F2F2F2", fill_type="solid")
+
+        ws.row_dimensions[current_row].height = 20
+        current_row += 1
+
+        # 5. Пустая строка-разделитель
+        current_row += 1
+
+        # 6. Заголовок секции с обозначениями
+        ws[f'A{current_row}'] = 'Занятия'
+        ws[f'A{current_row}'].font = Font(name='Calibri', size=10, bold=True, color='FFFFFF')
+        ws[f'A{current_row}'].fill = PatternFill(start_color="70AD47", end_color="70AD47", fill_type="solid")
+        ws[f'A{current_row}'].alignment = Alignment(horizontal='center', vertical='center')
+        ws[f'A{current_row}'].border = thin_border
+        ws.row_dimensions[current_row].height = 20
+        current_row += 1
+
+        # 7. Дни недели с обозначениями занятий (7 строк)
+        for day_idx, day_name in enumerate(days_of_week):
+            ws[f'A{current_row}'] = day_name
+            ws[f'A{current_row}'].font = header_font
+            ws[f'A{current_row}'].fill = header_fill
+            ws[f'A{current_row}'].alignment = Alignment(horizontal='center', vertical='center')
+            ws[f'A{current_row}'].border = thin_border
+
+            for week_idx, week_dates in enumerate(all_weeks):
+                col = week_idx + 2
+                date = week_dates[day_idx]
+
+                cell = ws.cell(row=current_row, column=col)
+                cell.border = thin_border
+
+                if start_date <= date <= end_date:
+                    if self.is_holiday(date):
+                        cell.value = '*'
+                        cell.fill = holiday_fill
+                        cell.font = Font(name='Calibri', size=10, bold=True, color='C65911')
+                        cell.alignment = Alignment(horizontal='center', vertical='center')
+                    elif date.weekday() >= 5:
+                        cell.fill = weekend_fill
                     else:
-                        date = datetime(year, month, day)
-                        cell.value = day
-                        cell.alignment = Alignment(horizontal='center')
+                        # Проверяем тип занятия
+                        activity_type = self.get_activity_for_date(date, generated_schedule)
+                        if activity_type and activity_type in activity_fills:
+                            cell.value = activity_type
+                            cell.font = Font(name='Calibri', size=10, bold=True, color='000000')
+                            cell.fill = activity_fills[activity_type]
+                            cell.alignment = Alignment(horizontal='center', vertical='center')
+                else:
+                    cell.value = ""
+                    cell.fill = PatternFill(start_color="FFFFFF", end_color="FFFFFF", fill_type="solid")
 
-                        # Применяем цвета и обозначения
-                        if self.is_holiday(date):
-                            cell.fill = holiday_fill
-                        elif date.weekday() >= 5:
-                            cell.fill = weekend_fill
-                        else:
-                            activity_type = self.get_activity_for_date(date, generated_schedule)
-                            if activity_type and activity_type in activity_fills:
-                                cell.fill = activity_fills[activity_type]
-                                cell.value = f"{day}\n{activity_type}"
-                                cell.alignment = Alignment(horizontal='center', vertical='center')
-                                cell.font = Font(size=9)
+            ws.row_dimensions[current_row].height = 18
+            current_row += 1
 
-            current_col += len(cal)
-
-        # Настройка размеров
-        ws.column_dimensions['A'].width = 6
-        for col in range(2, current_col):
-            ws.column_dimensions[get_column_letter(col)].width = 5
-
-        for row in range(3, 10):
-            ws.row_dimensions[row].height = 25
+        return current_row
 
     def get_activity_for_date(self, date, generated_schedule):
+        """Получить тип занятия для даты"""
         for period in generated_schedule:
             if date in period['days']:
                 return period['type']
         return None
-
-    def create_legend_sheet(self, ws, header_font, activity_fills, weekend_fill, holiday_fill, thin_border):
-        ws['A1'] = "Условные обозначения"
-        ws['A1'].font = Font(size=16, bold=True)
-
-        ws['A3'] = "Типы занятий:"
-        ws['A3'].font = header_font
-
-        activity_names = ['Т', 'П', 'ПА', 'ГИА', 'К']
-        activity_descriptions = ['Теоретическая подготовка', 'Практика', 'Промежуточная аттестация',
-                                 'Государственная итоговая аттестация', 'Каникулы']
-
-        for i, name in enumerate(activity_names):
-            col = chr(66 + i)
-            ws[f'{col}4'] = name
-            ws[f'{col}4'].font = header_font
-            ws[f'{col}4'].fill = activity_fills[name]
-            ws[f'{col}4'].border = thin_border
-            ws[f'{col}4'].alignment = Alignment(horizontal='center')
-
-            ws[f'{col}5'] = activity_descriptions[i]
-            ws[f'{col}5'].border = thin_border
-            ws[f'{col}5'].alignment = Alignment(horizontal='center')
-
-        ws['A7'] = "Прочие обозначения:"
-        ws['A7'].font = header_font
-
-        ws['B8'] = "Выходные"
-        ws['B8'].fill = weekend_fill
-        ws['B8'].border = thin_border
-        ws['B8'].alignment = Alignment(horizontal='center')
-
-        ws['C8'] = "Праздники"
-        ws['C8'].fill = holiday_fill
-        ws['C8'].border = thin_border
-        ws['C8'].alignment = Alignment(horizontal='center')
-
-        for col_letter in ['A', 'B', 'C', 'D', 'E', 'F']:
-            ws.column_dimensions[col_letter].width = 20
 
 
 class MainWindow(QMainWindow):
@@ -302,17 +442,15 @@ class MainWindow(QMainWindow):
         self.apply_styles()
 
     def init_ui(self):
-        self.setWindowTitle('Учебный график')
+        self.setWindowTitle('Учебный график - Улучшенная версия')
         self.setGeometry(100, 100, 1500, 900)
 
-        # Центральный виджет
         central_widget = QWidget()
         self.setCentralWidget(central_widget)
         main_layout = QVBoxLayout(central_widget)
         main_layout.setSpacing(0)
         main_layout.setContentsMargins(0, 0, 0, 0)
 
-        # Скролл область
         scroll = QScrollArea()
         scroll.setWidgetResizable(True)
         scroll.setFrameShape(QFrame.Shape.NoFrame)
@@ -323,44 +461,22 @@ class MainWindow(QMainWindow):
         content_layout.setSpacing(0)
         content_layout.setContentsMargins(0, 0, 0, 0)
 
-        # Основной контент с padding
         content_container = QWidget()
         content_container.setStyleSheet("background-color: #0e1117;")
         container_layout = QVBoxLayout(content_container)
         container_layout.setContentsMargins(50, 40, 50, 50)
         container_layout.setSpacing(32)
 
-        # Логотип и заголовок
         header_row = QHBoxLayout()
         header_row.setSpacing(24)
 
-        # Логотип (если есть файл logo.png)
-        logo_label = QLabel()
-        logo_label.setFixedSize(100, 100)
-        logo_label.setScaledContents(True)
-        logo_label.setStyleSheet("""
-            background-color: transparent;
-            border-radius: 12px;
-        """)
-        # Попытка загрузить логотип (если файл существует)
-        try:
-            from PyQt6.QtGui import QPixmap
-            pixmap = QPixmap('logo.png')
-            if not pixmap.isNull():
-                logo_label.setPixmap(pixmap)
-                header_row.addWidget(logo_label)
-        except:
-            pass
-
-        # Текстовый блок заголовка
         title_layout = QVBoxLayout()
         title_layout.setSpacing(8)
 
-        # Заголовок
-        title = QLabel('Учебный график')
+        title = QLabel('📚 Учебный график')
         title.setObjectName("mainTitle")
 
-        subtitle = QLabel('Создание календарного учебного графика')
+        subtitle = QLabel('Единый лист с легендой и улучшенным форматированием')
         subtitle.setObjectName("subtitle")
 
         title_layout.addWidget(title)
@@ -371,7 +487,6 @@ class MainWindow(QMainWindow):
 
         container_layout.addLayout(header_row)
 
-        # Декоративная линия под хедером
         header_line = QFrame()
         header_line.setFrameShape(QFrame.Shape.HLine)
         header_line.setStyleSheet("""
@@ -386,11 +501,9 @@ class MainWindow(QMainWindow):
         container_layout.addWidget(header_line)
         container_layout.addSpacing(8)
 
-        # Настройки (без заголовка)
         settings_row = QHBoxLayout()
         settings_row.setSpacing(20)
 
-        # Тип программы
         program_layout = QVBoxLayout()
         program_layout.setSpacing(8)
         program_label = QLabel('Тип программы')
@@ -401,7 +514,6 @@ class MainWindow(QMainWindow):
         program_layout.addWidget(program_label)
         program_layout.addWidget(self.program_combo)
 
-        # Начальный год
         year_layout = QVBoxLayout()
         year_layout.setSpacing(8)
         year_label = QLabel('Начальный год')
@@ -418,7 +530,6 @@ class MainWindow(QMainWindow):
 
         container_layout.addLayout(settings_row)
 
-        # Кнопки примера
         button_row = QHBoxLayout()
         button_row.setSpacing(12)
 
@@ -437,12 +548,10 @@ class MainWindow(QMainWindow):
         container_layout.addLayout(button_row)
         container_layout.addSpacing(16)
 
-        # Периоды обучения
         periods_label = QLabel('Периоды обучения')
         periods_label.setObjectName("sectionTitle")
         container_layout.addWidget(periods_label)
 
-        # Таблица
         self.table = QTableWidget()
         self.table.setColumnCount(4)
         self.table.setHorizontalHeaderLabels(['Год', 'Семестр', 'Тип', 'Недели'])
@@ -454,7 +563,6 @@ class MainWindow(QMainWindow):
         self.table.setMinimumHeight(400)
         container_layout.addWidget(self.table)
 
-        # Кнопки таблицы
         table_btn_row = QHBoxLayout()
         table_btn_row.setSpacing(12)
 
@@ -473,7 +581,6 @@ class MainWindow(QMainWindow):
         container_layout.addLayout(table_btn_row)
         container_layout.addSpacing(16)
 
-        # Кнопки действий
         action_row = QHBoxLayout()
         action_row.setSpacing(16)
 
@@ -491,7 +598,6 @@ class MainWindow(QMainWindow):
 
         container_layout.addLayout(action_row)
 
-        # Предварительный просмотр
         self.preview_section = QWidget()
         self.preview_section.setStyleSheet("background-color: #0e1117;")
         preview_layout = QVBoxLayout(self.preview_section)
@@ -516,12 +622,11 @@ class MainWindow(QMainWindow):
         self.preview_section.setVisible(False)
         container_layout.addWidget(self.preview_section)
 
-        # Footer с авторами
         footer_layout = QVBoxLayout()
         footer_layout.setContentsMargins(0, 32, 0, 0)
         footer_layout.setSpacing(0)
 
-        authors_label = QLabel('Разработчики: Бахмутов Е., Клюев П.')
+        authors_label = QLabel('Разработчики: Бахмутов Е., Клюев П. | Улучшенная версия v2.0')
         authors_label.setObjectName("authorsLabel")
         authors_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
         footer_layout.addWidget(authors_label)
@@ -820,7 +925,6 @@ class MainWindow(QMainWindow):
         row_position = self.table.rowCount()
         self.table.insertRow(row_position)
 
-        # Стиль для комбобоксов в таблице
         table_combo_style = """
             QComboBox {
                 padding: 11px 16px;
@@ -869,7 +973,6 @@ class MainWindow(QMainWindow):
         year_combo = QComboBox()
         year_combo.addItems(['1', '2', '3'])
         year_combo.setStyleSheet(table_combo_style)
-
         year_container = QWidget()
         year_container.setStyleSheet("background-color: transparent;")
         year_layout = QHBoxLayout(year_container)
@@ -882,7 +985,6 @@ class MainWindow(QMainWindow):
         semester_combo = QComboBox()
         semester_combo.addItems(['1', '2'])
         semester_combo.setStyleSheet(table_combo_style)
-
         semester_container = QWidget()
         semester_container.setStyleSheet("background-color: transparent;")
         semester_layout = QHBoxLayout(semester_container)
@@ -891,11 +993,10 @@ class MainWindow(QMainWindow):
         semester_layout.setAlignment(Qt.AlignmentFlag.AlignCenter)
         self.table.setCellWidget(row_position, 1, semester_container)
 
-        # Тип
+        # Тип - расширенный список
         type_combo = QComboBox()
-        type_combo.addItems(['Т', 'П', 'ПА', 'ГИА', 'К'])
+        type_combo.addItems(['Т', 'Э', 'П', 'У', 'ПА', 'ГИА', 'Г', 'Д', 'К'])
         type_combo.setStyleSheet(table_combo_style)
-
         type_container = QWidget()
         type_container.setStyleSheet("background-color: transparent;")
         type_layout = QHBoxLayout(type_container)
@@ -922,7 +1023,6 @@ class MainWindow(QMainWindow):
     def update_table(self):
         self.table.setRowCount(0)
 
-        # Стиль для комбобоксов в таблице
         table_combo_style = """
             QComboBox {
                 padding: 11px 16px;
@@ -976,7 +1076,6 @@ class MainWindow(QMainWindow):
             year_combo.addItems(['1', '2', '3'])
             year_combo.setCurrentText(str(data['Год']))
             year_combo.setStyleSheet(table_combo_style)
-
             year_container = QWidget()
             year_container.setStyleSheet("background-color: transparent;")
             year_layout = QHBoxLayout(year_container)
@@ -990,7 +1089,6 @@ class MainWindow(QMainWindow):
             semester_combo.addItems(['1', '2'])
             semester_combo.setCurrentText(str(data['Семестр']))
             semester_combo.setStyleSheet(table_combo_style)
-
             semester_container = QWidget()
             semester_container.setStyleSheet("background-color: transparent;")
             semester_layout = QHBoxLayout(semester_container)
@@ -1001,10 +1099,9 @@ class MainWindow(QMainWindow):
 
             # Тип
             type_combo = QComboBox()
-            type_combo.addItems(['Т', 'П', 'ПА', 'ГИА', 'К'])
+            type_combo.addItems(['Т', 'Э', 'П', 'У', 'ПА', 'ГИА', 'Г', 'Д', 'К'])
             type_combo.setCurrentText(data['Тип'])
             type_combo.setStyleSheet(table_combo_style)
-
             type_container = QWidget()
             type_container.setStyleSheet("background-color: transparent;")
             type_layout = QHBoxLayout(type_container)
@@ -1033,7 +1130,6 @@ class MainWindow(QMainWindow):
 
             if year_container and semester_container and type_container and weeks_item:
                 try:
-                    # Извлекаем комбобоксы из контейнеров
                     year_combo = year_container.findChild(QComboBox)
                     semester_combo = semester_container.findChild(QComboBox)
                     type_combo = type_container.findChild(QComboBox)
@@ -1060,7 +1156,7 @@ class MainWindow(QMainWindow):
         try:
             self.generated_schedule = self.app.generate_schedule(periods_data, self.start_year)
 
-            # Обновление таблицы предварительного просмотра
+            # Обновление предварительного просмотра
             self.preview_table.setRowCount(0)
             for period in self.generated_schedule:
                 row_position = self.preview_table.rowCount()
@@ -1089,10 +1185,14 @@ class MainWindow(QMainWindow):
             self.preview_section.setVisible(True)
             self.download_btn.setEnabled(True)
 
-            QMessageBox.information(self, 'Успех', f'График готов!\nСоздано периодов: {len(self.generated_schedule)}')
+            QMessageBox.information(self, 'Успех',
+                                    f'✅ График создан!\n\n'
+                                    f'📊 Периодов: {len(self.generated_schedule)}\n'
+                                    f'📅 Недель: {sum(p["weeks"] for p in self.generated_schedule):.1f}\n'
+                                    f'📝 Рабочих дней: {sum(len(p["days"]) for p in self.generated_schedule)}')
 
         except Exception as e:
-            QMessageBox.critical(self, 'Ошибка', f'Ошибка при генерации графика:\n{str(e)}')
+            QMessageBox.critical(self, 'Ошибка', f'Ошибка при генерации:\n{str(e)}')
 
     def download_excel(self):
         if not self.generated_schedule:
@@ -1102,7 +1202,7 @@ class MainWindow(QMainWindow):
         filename, _ = QFileDialog.getSaveFileName(
             self,
             'Сохранить Excel файл',
-            f'график_{self.start_year}-{self.start_year + 1}.xlsx',
+            f'график_{self.start_year}-{self.start_year + (2 if "Ординатура" in self.program_type else 3)}.xlsx',
             'Excel Files (*.xlsx)'
         )
 
@@ -1110,15 +1210,14 @@ class MainWindow(QMainWindow):
             try:
                 wb = self.app.create_excel_file(self.generated_schedule, self.start_year, self.program_type)
                 wb.save(filename)
-                QMessageBox.information(self, 'Успех', f'Файл успешно сохранен:\n{filename}')
+                QMessageBox.information(self, 'Успех', f'✅ Файл сохранен:\n{filename}')
             except Exception as e:
-                QMessageBox.critical(self, 'Ошибка', f'Ошибка при сохранении файла:\n{str(e)}')
+                QMessageBox.critical(self, 'Ошибка', f'Ошибка при сохранении:\n{str(e)}')
 
 
 def main():
     app = QApplication(sys.argv)
 
-    # Установка шрифта
     font = QFont()
     font.setPointSize(10)
     app.setFont(font)
