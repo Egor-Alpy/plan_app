@@ -98,81 +98,85 @@ class EducationalScheduleApp:
 
     def create_excel_file(self, generated_schedule, start_year, program_type):
         wb = Workbook()
-        ws = wb.active
-        ws.title = "Учебный график"
 
         program_years = 2 if "Ординатура" in program_type else 3
 
         # ===== СТИЛИ =====
         # Шрифты
         header_font = Font(name='Calibri', size=11, bold=True, color='FFFFFF')
-        title_font = Font(name='Calibri', size=16, bold=True, color='1F4E78')
+        title_font = Font(name='Calibri', size=16, bold=True, color='1976D2')  # Яркий синий
         year_title_font = Font(name='Calibri', size=14, bold=True, color='FFFFFF')
-        legend_header_font = Font(name='Calibri', size=12, bold=True, color='1F4E78')
+        legend_header_font = Font(name='Calibri', size=12, bold=True, color='1976D2')  # Яркий синий
         legend_font = Font(name='Calibri', size=10, color='000000')
         data_font = Font(name='Calibri', size=10, color='000000')
 
-        # Границы
+        # Границы (мягкие цвета)
         thin_border = Border(
-            left=Side(style='thin', color='BFBFBF'),
-            right=Side(style='thin', color='BFBFBF'),
-            top=Side(style='thin', color='BFBFBF'),
-            bottom=Side(style='thin', color='BFBFBF')
+            left=Side(style='thin', color='E0E0E0'),
+            right=Side(style='thin', color='E0E0E0'),
+            top=Side(style='thin', color='E0E0E0'),
+            bottom=Side(style='thin', color='E0E0E0')
         )
 
         thick_border = Border(
-            left=Side(style='medium', color='1F4E78'),
-            right=Side(style='medium', color='1F4E78'),
-            top=Side(style='medium', color='1F4E78'),
-            bottom=Side(style='medium', color='1F4E78')
+            left=Side(style='medium', color='90CAF9'),
+            right=Side(style='medium', color='90CAF9'),
+            top=Side(style='medium', color='90CAF9'),
+            bottom=Side(style='medium', color='90CAF9')
         )
 
-        # Цвета для типов занятий (расширенная палитра)
+        # Цвета для типов занятий (контрастная палитра)
         activity_fills = {
-            'Т': PatternFill(start_color="D4EDDA", end_color="D4EDDA", fill_type="solid"),  # Теория - зелено-мятный
-            'Э': PatternFill(start_color="FFF3CD", end_color="FFF3CD", fill_type="solid"),  # Экзамены - кремовый
-            'П': PatternFill(start_color="CCE5FF", end_color="CCE5FF", fill_type="solid"),  # Практика - голубой
-            'У': PatternFill(start_color="E3F2FD", end_color="E3F2FD", fill_type="solid"),
-            # Учебная практика - светло-голубой
-            'ПА': PatternFill(start_color="FFE4CC", end_color="FFE4CC", fill_type="solid"),
-            # Промежуточная аттестация - персиковый
-            'ГИА': PatternFill(start_color="E2D5F1", end_color="E2D5F1", fill_type="solid"),  # ГИА - лавандовый
-            'Г': PatternFill(start_color="DDA0DD", end_color="DDA0DD", fill_type="solid"),  # Гос. экзамен - сливовый
-            'Д': PatternFill(start_color="F0E68C", end_color="F0E68C", fill_type="solid"),  # Защита ВКР - хаки
-            'К': PatternFill(start_color="FFE4E1", end_color="FFE4E1", fill_type="solid"),  # Каникулы - розовый
+            'Т': PatternFill(start_color="BBDEFB", end_color="BBDEFB", fill_type="solid"),  # Теория - голубой
+            'Э': PatternFill(start_color="FFF59D", end_color="FFF59D", fill_type="solid"),  # Экзамены - жёлтый
+            'П': PatternFill(start_color="C8E6C9", end_color="C8E6C9", fill_type="solid"),  # Практика - зелёный
+            'У': PatternFill(start_color="B2EBF2", end_color="B2EBF2", fill_type="solid"),  # Учебная практика - циан
+            'ПА': PatternFill(start_color="FFCC80", end_color="FFCC80", fill_type="solid"),
+            # Промежуточная аттестация - оранжевый
+            'ГИА': PatternFill(start_color="E1BEE7", end_color="E1BEE7", fill_type="solid"),  # ГИА - фиолетовый
+            'Г': PatternFill(start_color="F8BBD0", end_color="F8BBD0", fill_type="solid"),  # Гос. экзамен - розовый
+            'Д': PatternFill(start_color="D1C4E9", end_color="D1C4E9", fill_type="solid"),  # Защита ВКР - индиго
+            'К': PatternFill(start_color="FFE082", end_color="FFE082", fill_type="solid"),  # Каникулы - янтарный
         }
 
-        # Дополнительные цвета
-        weekend_fill = PatternFill(start_color="F5F5F5", end_color="F5F5F5", fill_type="solid")
-        holiday_fill = PatternFill(start_color="FFE7E7", end_color="FFE7E7", fill_type="solid")
-        header_fill = PatternFill(start_color="5B9BD5", end_color="5B9BD5", fill_type="solid")
-        month_fill = PatternFill(start_color="A9D08E", end_color="A9D08E", fill_type="solid")
-        year_header_fill = PatternFill(start_color="4472C4", end_color="4472C4", fill_type="solid")
-        legend_header_fill = PatternFill(start_color="E7E6E6", end_color="E7E6E6", fill_type="solid")
+        # Дополнительные цвета (контрастная схема)
+        weekend_fill = PatternFill(start_color="F5F5F5", end_color="F5F5F5",
+                                   fill_type="solid")  # Выходные - светло-серый
+        holiday_fill = PatternFill(start_color="FFCDD2", end_color="FFCDD2", fill_type="solid")  # Праздники - розовый
+        header_fill = PatternFill(start_color="64B5F6", end_color="64B5F6", fill_type="solid")  # Заголовки - голубой
+        month_fill = PatternFill(start_color="C8E6C9", end_color="C8E6C9", fill_type="solid")  # НЕ используется
+        month_fill_alt = PatternFill(start_color="E0E0E0", end_color="E0E0E0", fill_type="solid")  # НЕ используется
+        year_header_fill = PatternFill(start_color="42A5F5", end_color="42A5F5",
+                                       fill_type="solid")  # Заголовок года - синий
+        legend_header_fill = PatternFill(start_color="F5F5F5", end_color="F5F5F5",
+                                         fill_type="solid")  # Легенда - светло-серый
+
+        # ===== ЛИСТ 1: УСЛОВНЫЕ ОБОЗНАЧЕНИЯ =====
+        ws_legend = wb.active
+        ws_legend.title = "Условные обозначения"
 
         current_row = 1
 
-        # ===== ГЛАВНЫЙ ЗАГОЛОВОК =====
-        ws.merge_cells(f'A{current_row}:AZ{current_row}')
-        ws[f'A{current_row}'] = f"КАЛЕНДАРНЫЙ УЧЕБНЫЙ ГРАФИК {start_year}-{start_year + program_years} г."
-        ws[f'A{current_row}'].font = title_font
-        ws[f'A{current_row}'].alignment = Alignment(horizontal='center', vertical='center')
-        ws[f'A{current_row}'].fill = legend_header_fill
-        ws[f'A{current_row}'].border = thick_border
-        ws.row_dimensions[current_row].height = 30
+        # Главный заголовок
+        ws_legend.merge_cells(f'A{current_row}:F{current_row}')
+        ws_legend[f'A{current_row}'] = f"КАЛЕНДАРНЫЙ УЧЕБНЫЙ ГРАФИК {start_year}-{start_year + program_years} г."
+        ws_legend[f'A{current_row}'].font = title_font
+        ws_legend[f'A{current_row}'].alignment = Alignment(horizontal='center', vertical='center')
+        ws_legend[f'A{current_row}'].fill = legend_header_fill
+        ws_legend[f'A{current_row}'].border = thick_border
+        ws_legend.row_dimensions[current_row].height = 35
         current_row += 1
 
-        # ===== ЛЕГЕНДА =====
         current_row += 1  # Пустая строка
 
         # Заголовок легенды
-        ws.merge_cells(f'A{current_row}:F{current_row}')
-        ws[f'A{current_row}'] = "УСЛОВНЫЕ ОБОЗНАЧЕНИЯ"
-        ws[f'A{current_row}'].font = legend_header_font
-        ws[f'A{current_row}'].alignment = Alignment(horizontal='center', vertical='center')
-        ws[f'A{current_row}'].fill = legend_header_fill
-        ws[f'A{current_row}'].border = thick_border
-        ws.row_dimensions[current_row].height = 25
+        ws_legend.merge_cells(f'A{current_row}:F{current_row}')
+        ws_legend[f'A{current_row}'] = "УСЛОВНЫЕ ОБОЗНАЧЕНИЯ"
+        ws_legend[f'A{current_row}'].font = legend_header_font
+        ws_legend[f'A{current_row}'].alignment = Alignment(horizontal='center', vertical='center')
+        ws_legend[f'A{current_row}'].fill = legend_header_fill
+        ws_legend[f'A{current_row}'].border = thick_border
+        ws_legend.row_dimensions[current_row].height = 25
         current_row += 1
 
         # Легенда с описаниями
@@ -191,31 +195,53 @@ class EducationalScheduleApp:
 
         for symbol, description, fill in legend_items:
             # Символ
-            ws[f'A{current_row}'] = symbol
-            ws[f'A{current_row}'].font = Font(name='Calibri', size=11, bold=True, color='000000')
-            ws[f'A{current_row}'].alignment = Alignment(horizontal='center', vertical='center')
-            ws[f'A{current_row}'].fill = fill
-            ws[f'A{current_row}'].border = thin_border
+            ws_legend[f'A{current_row}'] = symbol
+            ws_legend[f'A{current_row}'].font = Font(name='Calibri', size=11, bold=True, color='000000')
+            ws_legend[f'A{current_row}'].alignment = Alignment(horizontal='center', vertical='center')
+            ws_legend[f'A{current_row}'].fill = fill
+            ws_legend[f'A{current_row}'].border = thin_border
 
             # Описание
-            ws.merge_cells(f'B{current_row}:F{current_row}')
-            ws[f'B{current_row}'] = description
-            ws[f'B{current_row}'].font = legend_font
-            ws[f'B{current_row}'].alignment = Alignment(horizontal='left', vertical='center')
-            ws[f'B{current_row}'].border = thin_border
+            ws_legend.merge_cells(f'B{current_row}:F{current_row}')
+            ws_legend[f'B{current_row}'] = description
+            ws_legend[f'B{current_row}'].font = legend_font
+            ws_legend[f'B{current_row}'].alignment = Alignment(horizontal='left', vertical='center')
+            ws_legend[f'B{current_row}'].border = thin_border
 
-            ws.row_dimensions[current_row].height = 22
+            ws_legend.row_dimensions[current_row].height = 22
             current_row += 1
 
-        current_row += 1  # Пустая строка после легенды
+        # Настройка размеров колонок для листа легенды
+        ws_legend.column_dimensions['A'].width = 8
+        ws_legend.column_dimensions['B'].width = 50
+        ws_legend.column_dimensions['C'].width = 10
+        ws_legend.column_dimensions['D'].width = 10
+        ws_legend.column_dimensions['E'].width = 10
+        ws_legend.column_dimensions['F'].width = 10
+
+        # ===== ЛИСТ 2: КАЛЕНДАРНЫЙ ГРАФИК =====
+        ws = wb.create_sheet("Календарный график")
+
+        current_row = 1
+
+        # Главный заголовок
+        ws.merge_cells(f'A{current_row}:BB{current_row}')
+        ws[f'A{current_row}'] = f"КАЛЕНДАРНЫЙ УЧЕБНЫЙ ГРАФИК {start_year}-{start_year + program_years} г."
+        ws[f'A{current_row}'].font = title_font
+        ws[f'A{current_row}'].alignment = Alignment(horizontal='center', vertical='center')
+        ws[f'A{current_row}'].fill = legend_header_fill
+        ws[f'A{current_row}'].border = thick_border
+        ws.row_dimensions[current_row].height = 35
+        current_row += 1
+
+        current_row += 1  # Пустая строка
 
         # ===== КАЛЕНДАРИ ДЛЯ КАЖДОГО ГОДА =====
         for academic_year in range(program_years):
             actual_year = start_year + academic_year
 
             # Заголовок года
-            current_row += 1
-            ws.merge_cells(f'A{current_row}:AZ{current_row}')
+            ws.merge_cells(f'A{current_row}:BB{current_row}')
             ws[f'A{current_row}'] = f"УЧЕБНЫЙ ГОД {actual_year}-{actual_year + 1}"
             ws[f'A{current_row}'].font = year_title_font
             ws[f'A{current_row}'].alignment = Alignment(horizontal='center', vertical='center')
@@ -231,29 +257,22 @@ class EducationalScheduleApp:
                 ws, actual_year, generated_schedule,
                 activity_fills, weekend_fill, holiday_fill,
                 thin_border, header_font, header_fill,
-                month_fill, data_font, current_row
+                month_fill, month_fill_alt, data_font, current_row
             )
 
             current_row += 2  # Две пустые строки между годами
 
-        # Настройка размеров колонок
+        # Настройка размеров колонок для календаря
         ws.column_dimensions['A'].width = 6
         for col_idx in range(2, 60):
             ws.column_dimensions[get_column_letter(col_idx)].width = 4.5
-
-        # Ширина для легенды
-        ws.column_dimensions['B'].width = 50
-        ws.column_dimensions['C'].width = 10
-        ws.column_dimensions['D'].width = 10
-        ws.column_dimensions['E'].width = 10
-        ws.column_dimensions['F'].width = 10
 
         return wb
 
     def create_horizontal_calendar(self, ws, start_year, generated_schedule,
                                    activity_fills, weekend_fill, holiday_fill,
                                    thin_border, header_font, header_fill,
-                                   month_fill, data_font, start_row):
+                                   month_fill, month_fill_alt, data_font, start_row):
         """
         ГОРИЗОНТАЛЬНЫЙ КАЛЕНДАРЬ С УЛУЧШЕННЫМ ФОРМАТИРОВАНИЕМ
         """
@@ -272,42 +291,75 @@ class EducationalScheduleApp:
             all_weeks.append(week_dates)
             current_date += timedelta(days=7)
 
-        # 2. Строка "Мес" и месяцы
+        # Создаём мапу месяцев на порядковый номер в учебном году для чередования шрифта
+        academic_months_list = [(start_year, m) for m in range(9, 13)] + \
+                               [(start_year + 1, m) for m in range(1, 9)]
+        month_to_index = {}
+        for idx, month_key in enumerate(academic_months_list):
+            month_to_index[month_key] = idx
+
+        # 2. Строка "Месяц" и месяцы
         ws[f'A{current_row}'] = 'Месяц'
         ws[f'A{current_row}'].font = header_font
         ws[f'A{current_row}'].fill = header_fill
         ws[f'A{current_row}'].alignment = Alignment(horizontal='center', vertical='center')
         ws[f'A{current_row}'].border = thin_border
 
-        # Определяем колонки для каждого месяца
+        # Определяем колонки для каждого месяца - ИСПРАВЛЕНО
         month_columns = {}
         for week_idx, week_dates in enumerate(all_weeks):
             col = week_idx + 2
-            monday = week_dates[0]
-            if start_date <= monday <= end_date:
-                month_key = (monday.year, monday.month)
+            # Находим дни недели, которые входят в учебный год
+            days_in_range = [d for d in week_dates if start_date <= d <= end_date]
+            if days_in_range:
+                # Берём последний день недели, который входит в диапазон
+                # (это гарантирует правильное отнесение недели к месяцу)
+                representative_date = days_in_range[-1]
+                month_key = (representative_date.year, representative_date.month)
                 if month_key not in month_columns:
                     month_columns[month_key] = []
                 month_columns[month_key].append(col)
 
-        # Пишем месяцы
+        # Пишем месяцы с чередованием цветов
         academic_months = [(start_year, m) for m in range(9, 13)] + \
                           [(start_year + 1, m) for m in range(1, 9)]
 
-        for year, month in academic_months:
+        # Толстая граница для разделения месяцев (мягкий цвет)
+        thick_month_border = Border(
+            left=Side(style='thin', color='E0E0E0'),
+            right=Side(style='medium', color='B0BEC5'),  # Мягкая серо-голубая граница
+            top=Side(style='thin', color='E0E0E0'),
+            bottom=Side(style='thin', color='E0E0E0')
+        )
+
+        for month_idx, (year, month) in enumerate(academic_months):
             month_key = (year, month)
             if month_key in month_columns:
                 cols = sorted(month_columns[month_key])
                 start_col = cols[0]
                 end_col = cols[-1]
 
-                cell = ws.cell(row=current_row, column=start_col)
-                cell.value = self.month_names_ru[month]
-                cell.font = Font(name='Calibri', size=10, bold=True, color='FFFFFF')
-                cell.fill = month_fill
-                cell.alignment = Alignment(horizontal='center', vertical='center')
-                cell.border = thin_border
+                # Применяем БЕЗ заливки ко всем ячейкам месяца
+                for col in range(start_col, end_col + 1):
+                    cell = ws.cell(row=current_row, column=col)
 
+                    # Первая ячейка содержит название месяца
+                    if col == start_col:
+                        cell.value = self.month_names_ru[month]
+                        cell.font = Font(name='Calibri', size=10, bold=True, color='424242')  # Тёмно-серый текст
+
+                    # БЕЗ заливки - просто белый фон
+                    cell.fill = PatternFill(start_color="FFFFFF", end_color="FFFFFF", fill_type="solid")
+
+                    cell.alignment = Alignment(horizontal='center', vertical='center')
+
+                    # Последняя колонка месяца получает толстую правую границу
+                    if col == end_col:
+                        cell.border = thick_month_border
+                    else:
+                        cell.border = thin_border
+
+                # Мержим ячейки для названия месяца
                 if start_col != end_col:
                     ws.merge_cells(
                         f'{get_column_letter(start_col)}{current_row}:{get_column_letter(end_col)}{current_row}')
@@ -315,8 +367,16 @@ class EducationalScheduleApp:
         ws.row_dimensions[current_row].height = 20
         current_row += 1
 
-        # 3. Дни недели с числами (7 строк)
+        # 3. Дни недели с числами (7 строк) - ДОБАВЛЕНО ЧЕРЕДОВАНИЕ ШРИФТА
         days_of_week = ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Вс']
+
+        # Толстая граница для разделения месяцев
+        thick_month_border = Border(
+            left=Side(style='thin', color='E0E0E0'),
+            right=Side(style='medium', color='B0BEC5'),
+            top=Side(style='thin', color='E0E0E0'),
+            bottom=Side(style='thin', color='E0E0E0')
+        )
 
         for day_idx, day_name in enumerate(days_of_week):
             ws[f'A{current_row}'] = day_name
@@ -333,15 +393,31 @@ class EducationalScheduleApp:
 
                 if start_date <= date <= end_date:
                     cell.value = date.day
-                    cell.font = data_font
+
+                    # Определяем, должен ли шрифт быть полужирным - НОВОЕ
+                    month_key = (date.year, date.month)
+                    month_index = month_to_index.get(month_key, 0)
+                    is_bold = month_index % 2 == 0  # Чётные месяцы (сентябрь=0) - полужирные
+
                     cell.alignment = Alignment(horizontal='center', vertical='center')
-                    cell.border = thin_border
+
+                    # Проверяем, является ли эта колонка последней в месяце
+                    is_last_col_of_month = False
+                    for m_key, cols in month_columns.items():
+                        if col == max(cols):
+                            is_last_col_of_month = True
+                            break
+
+                    cell.border = thick_month_border if is_last_col_of_month else thin_border
 
                     if self.is_holiday(date):
                         cell.fill = holiday_fill
-                        cell.font = Font(name='Calibri', size=10, bold=True, color='C65911')
+                        cell.font = Font(name='Calibri', size=10, bold=True, color='D32F2F')  # Яркий красный
                     elif date.weekday() >= 5:
                         cell.fill = weekend_fill
+                        cell.font = Font(name='Calibri', size=10, bold=is_bold, color='000000')
+                    else:
+                        cell.font = Font(name='Calibri', size=10, bold=is_bold, color='000000')
                 else:
                     cell.value = ""
                     cell.fill = PatternFill(start_color="FFFFFF", end_color="FFFFFF", fill_type="solid")
@@ -357,14 +433,30 @@ class EducationalScheduleApp:
         ws[f'A{current_row}'].alignment = Alignment(horizontal='center', vertical='center')
         ws[f'A{current_row}'].border = thin_border
 
+        # Толстая граница для разделения месяцев
+        thick_month_border_week = Border(
+            left=Side(style='thin', color='E0E0E0'),
+            right=Side(style='medium', color='B0BEC5'),
+            top=Side(style='thin', color='E0E0E0'),
+            bottom=Side(style='thin', color='E0E0E0')
+        )
+
         for week_idx in range(len(all_weeks)):
             col = week_idx + 2
             cell = ws.cell(row=current_row, column=col)
             cell.value = week_idx + 1
-            cell.font = Font(name='Calibri', size=10, bold=True, color='1F4E78')
+            cell.font = Font(name='Calibri', size=10, bold=True, color='FFFFFF')
             cell.alignment = Alignment(horizontal='center', vertical='center')
-            cell.border = thin_border
-            cell.fill = PatternFill(start_color="F2F2F2", end_color="F2F2F2", fill_type="solid")
+            cell.fill = PatternFill(start_color="66BB6A", end_color="66BB6A", fill_type="solid")  # Яркий зелёный
+
+            # Проверяем, является ли эта колонка последней в месяце
+            is_last_col_of_month = False
+            for month_key, cols in month_columns.items():
+                if col == max(cols):
+                    is_last_col_of_month = True
+                    break
+
+            cell.border = thick_month_border_week if is_last_col_of_month else thin_border
 
         ws.row_dimensions[current_row].height = 20
         current_row += 1
@@ -375,7 +467,8 @@ class EducationalScheduleApp:
         # 6. Заголовок секции с обозначениями
         ws[f'A{current_row}'] = 'Занятия'
         ws[f'A{current_row}'].font = Font(name='Calibri', size=10, bold=True, color='FFFFFF')
-        ws[f'A{current_row}'].fill = PatternFill(start_color="70AD47", end_color="70AD47", fill_type="solid")
+        ws[f'A{current_row}'].fill = PatternFill(start_color="66BB6A", end_color="66BB6A",
+                                                 fill_type="solid")  # Яркий зелёный
         ws[f'A{current_row}'].alignment = Alignment(horizontal='center', vertical='center')
         ws[f'A{current_row}'].border = thin_border
         ws.row_dimensions[current_row].height = 20
@@ -394,13 +487,29 @@ class EducationalScheduleApp:
                 date = week_dates[day_idx]
 
                 cell = ws.cell(row=current_row, column=col)
-                cell.border = thin_border
+
+                # Проверяем, является ли эта колонка последней в месяце
+                is_last_col_of_month = False
+                for month_key, cols in month_columns.items():
+                    if col == max(cols):
+                        is_last_col_of_month = True
+                        break
+
+                # Толстая граница для разделения месяцев
+                thick_month_border_activity = Border(
+                    left=Side(style='thin', color='E0E0E0'),
+                    right=Side(style='medium', color='B0BEC5'),
+                    top=Side(style='thin', color='E0E0E0'),
+                    bottom=Side(style='thin', color='E0E0E0')
+                )
+
+                cell.border = thick_month_border_activity if is_last_col_of_month else thin_border
 
                 if start_date <= date <= end_date:
                     if self.is_holiday(date):
                         cell.value = '*'
                         cell.fill = holiday_fill
-                        cell.font = Font(name='Calibri', size=10, bold=True, color='C65911')
+                        cell.font = Font(name='Calibri', size=10, bold=True, color='D32F2F')  # Яркий красный
                         cell.alignment = Alignment(horizontal='center', vertical='center')
                     elif date.weekday() >= 5:
                         cell.fill = weekend_fill
@@ -409,7 +518,13 @@ class EducationalScheduleApp:
                         activity_type = self.get_activity_for_date(date, generated_schedule)
                         if activity_type and activity_type in activity_fills:
                             cell.value = activity_type
-                            cell.font = Font(name='Calibri', size=10, bold=True, color='000000')
+
+                            # Определяем, должен ли шрифт быть полужирным - НОВОЕ
+                            month_key = (date.year, date.month)
+                            month_index = month_to_index.get(month_key, 0)
+                            is_bold = month_index % 2 == 0  # Чётные месяцы - полужирные
+
+                            cell.font = Font(name='Calibri', size=10, bold=is_bold, color='000000')
                             cell.fill = activity_fills[activity_type]
                             cell.alignment = Alignment(horizontal='center', vertical='center')
                 else:
@@ -476,7 +591,7 @@ class MainWindow(QMainWindow):
         title = QLabel('📚 Учебный график')
         title.setObjectName("mainTitle")
 
-        subtitle = QLabel('Единый лист с легендой и улучшенным форматированием')
+        subtitle = QLabel('Контрастные яркие цвета + месяцы без заливки')
         subtitle.setObjectName("subtitle")
 
         title_layout.addWidget(title)
@@ -533,7 +648,7 @@ class MainWindow(QMainWindow):
         button_row = QHBoxLayout()
         button_row.setSpacing(12)
 
-        example_btn = QPushButton('📋 Пример ординатуры')
+        example_btn = QPushButton('📋 Загрузить пример')
         example_btn.setObjectName("secondaryButton")
         example_btn.clicked.connect(self.load_example)
 
@@ -626,7 +741,7 @@ class MainWindow(QMainWindow):
         footer_layout.setContentsMargins(0, 32, 0, 0)
         footer_layout.setSpacing(0)
 
-        authors_label = QLabel('Разработчики: Бахмутов Е., Клюев П. | Улучшенная версия v2.0')
+        authors_label = QLabel('Разработчики: Бахмутов Е., Клюев П. | v2.8 - Контрастные цвета + без заливки месяцев')
         authors_label.setObjectName("authorsLabel")
         authors_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
         footer_layout.addWidget(authors_label)
@@ -896,23 +1011,58 @@ class MainWindow(QMainWindow):
         self.start_year = int(text)
 
     def load_example(self):
-        self.periods_data = [
-            {"Год": 1, "Семестр": 1, "Тип": "Т", "Недели": 10},
-            {"Год": 1, "Семестр": 1, "Тип": "П", "Недели": 12},
-            {"Год": 1, "Семестр": 1, "Тип": "ПА", "Недели": 1},
-            {"Год": 1, "Семестр": 2, "Тип": "Т", "Недели": 4},
-            {"Год": 1, "Семестр": 2, "Тип": "П", "Недели": 16},
-            {"Год": 1, "Семестр": 2, "Тип": "ПА", "Недели": 1},
-            {"Год": 1, "Семестр": 2, "Тип": "К", "Недели": 6},
-            {"Год": 2, "Семестр": 1, "Тип": "Т", "Недели": 10},
-            {"Год": 2, "Семестр": 1, "Тип": "П", "Недели": 12},
-            {"Год": 2, "Семестр": 1, "Тип": "ПА", "Недели": 1},
-            {"Год": 2, "Семестр": 2, "Тип": "Т", "Недели": 9},
-            {"Год": 2, "Семестр": 2, "Тип": "П", "Недели": 8},
-            {"Год": 2, "Семестр": 2, "Тип": "ПА", "Недели": 1},
-            {"Год": 2, "Семестр": 2, "Тип": "ГИА", "Недели": 2},
-            {"Год": 2, "Семестр": 2, "Тип": "К", "Недели": 6}
-        ]
+        if "Аспирантура" in self.program_type:
+            # Пример для 3-летней аспирантуры
+            self.periods_data = [
+                {"Год": 1, "Семестр": 1, "Тип": "Т", "Недели": 12},
+                {"Год": 1, "Семестр": 1, "Тип": "Э", "Недели": 2},
+                {"Год": 1, "Семестр": 1, "Тип": "П", "Недели": 8},
+                {"Год": 1, "Семестр": 1, "Тип": "ПА", "Недели": 1},
+                {"Год": 1, "Семестр": 2, "Тип": "Т", "Недели": 10},
+                {"Год": 1, "Семестр": 2, "Тип": "Э", "Недели": 2},
+                {"Год": 1, "Семестр": 2, "Тип": "П", "Недели": 6},
+                {"Год": 1, "Семестр": 2, "Тип": "ПА", "Недели": 1},
+                {"Год": 1, "Семестр": 2, "Тип": "К", "Недели": 6},
+
+                {"Год": 2, "Семестр": 1, "Тип": "Т", "Недели": 12},
+                {"Год": 2, "Семестр": 1, "Тип": "Э", "Недели": 2},
+                {"Год": 2, "Семестр": 1, "Тип": "П", "Недели": 8},
+                {"Год": 2, "Семестр": 1, "Тип": "ПА", "Недели": 1},
+                {"Год": 2, "Семестр": 2, "Тип": "Т", "Недели": 10},
+                {"Год": 2, "Семестр": 2, "Тип": "Э", "Недели": 2},
+                {"Год": 2, "Семестр": 2, "Тип": "П", "Недели": 6},
+                {"Год": 2, "Семестр": 2, "Тип": "ПА", "Недели": 1},
+                {"Год": 2, "Семестр": 2, "Тип": "К", "Недели": 6},
+
+                {"Год": 3, "Семестр": 1, "Тип": "Т", "Недели": 10},
+                {"Год": 3, "Семестр": 1, "Тип": "У", "Недели": 4},
+                {"Год": 3, "Семестр": 1, "Тип": "П", "Недели": 8},
+                {"Год": 3, "Семестр": 1, "Тип": "ПА", "Недели": 1},
+                {"Год": 3, "Семестр": 2, "Тип": "Т", "Недели": 6},
+                {"Год": 3, "Семестр": 2, "Тип": "П", "Недели": 6},
+                {"Год": 3, "Семестр": 2, "Тип": "Г", "Недели": 2},
+                {"Год": 3, "Семестр": 2, "Тип": "Д", "Недели": 4},
+                {"Год": 3, "Семестр": 2, "Тип": "К", "Недели": 8}
+            ]
+        else:
+            # Пример для 2-летней ординатуры
+            self.periods_data = [
+                {"Год": 1, "Семестр": 1, "Тип": "Т", "Недели": 10},
+                {"Год": 1, "Семестр": 1, "Тип": "П", "Недели": 12},
+                {"Год": 1, "Семестр": 1, "Тип": "ПА", "Недели": 1},
+                {"Год": 1, "Семестр": 2, "Тип": "Т", "Недели": 4},
+                {"Год": 1, "Семестр": 2, "Тип": "П", "Недели": 16},
+                {"Год": 1, "Семестр": 2, "Тип": "ПА", "Недели": 1},
+                {"Год": 1, "Семестр": 2, "Тип": "К", "Недели": 6},
+                {"Год": 2, "Семестр": 1, "Тип": "Т", "Недели": 10},
+                {"Год": 2, "Семестр": 1, "Тип": "П", "Недели": 12},
+                {"Год": 2, "Семестр": 1, "Тип": "ПА", "Недели": 1},
+                {"Год": 2, "Семестр": 2, "Тип": "Т", "Недели": 9},
+                {"Год": 2, "Семестр": 2, "Тип": "П", "Недели": 8},
+                {"Год": 2, "Семестр": 2, "Тип": "ПА", "Недели": 1},
+                {"Год": 2, "Семестр": 2, "Тип": "ГИА", "Недели": 2},
+                {"Год": 2, "Семестр": 2, "Тип": "К", "Недели": 6}
+            ]
         self.update_table()
 
     def clear_data(self):
