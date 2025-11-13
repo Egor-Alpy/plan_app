@@ -102,15 +102,13 @@ class EducationalScheduleApp:
         program_years = 2 if "Ординатура" in program_type else 3
 
         # ===== СТИЛИ =====
-        # Шрифты
         header_font = Font(name='Calibri', size=11, bold=True, color='FFFFFF')
-        title_font = Font(name='Calibri', size=16, bold=True, color='1976D2')  # Яркий синий
+        title_font = Font(name='Calibri', size=16, bold=True, color='1976D2')
         year_title_font = Font(name='Calibri', size=14, bold=True, color='FFFFFF')
-        legend_header_font = Font(name='Calibri', size=12, bold=True, color='1976D2')  # Яркий синий
+        legend_header_font = Font(name='Calibri', size=12, bold=True, color='1976D2')
         legend_font = Font(name='Calibri', size=10, color='000000')
         data_font = Font(name='Calibri', size=10, color='000000')
 
-        # Границы (мягкие цвета)
         thin_border = Border(
             left=Side(style='thin', color='E0E0E0'),
             right=Side(style='thin', color='E0E0E0'),
@@ -125,31 +123,25 @@ class EducationalScheduleApp:
             bottom=Side(style='medium', color='90CAF9')
         )
 
-        # Цвета для типов занятий (контрастная палитра)
         activity_fills = {
-            'Т': PatternFill(start_color="BBDEFB", end_color="BBDEFB", fill_type="solid"),  # Теория - голубой
-            'Э': PatternFill(start_color="FFF59D", end_color="FFF59D", fill_type="solid"),  # Экзамены - жёлтый
-            'П': PatternFill(start_color="C8E6C9", end_color="C8E6C9", fill_type="solid"),  # Практика - зелёный
-            'У': PatternFill(start_color="B2EBF2", end_color="B2EBF2", fill_type="solid"),  # Учебная практика - циан
+            'Т': PatternFill(start_color="BBDEFB", end_color="BBDEFB", fill_type="solid"),
+            'Э': PatternFill(start_color="FFF59D", end_color="FFF59D", fill_type="solid"),
+            'П': PatternFill(start_color="C8E6C9", end_color="C8E6C9", fill_type="solid"),
+            'У': PatternFill(start_color="B2EBF2", end_color="B2EBF2", fill_type="solid"),
             'ПА': PatternFill(start_color="FFCC80", end_color="FFCC80", fill_type="solid"),
-            # Промежуточная аттестация - оранжевый
-            'ГИА': PatternFill(start_color="E1BEE7", end_color="E1BEE7", fill_type="solid"),  # ГИА - фиолетовый
-            'Г': PatternFill(start_color="F8BBD0", end_color="F8BBD0", fill_type="solid"),  # Гос. экзамен - розовый
-            'Д': PatternFill(start_color="D1C4E9", end_color="D1C4E9", fill_type="solid"),  # Защита ВКР - индиго
-            'К': PatternFill(start_color="FFE082", end_color="FFE082", fill_type="solid"),  # Каникулы - янтарный
+            'ГИА': PatternFill(start_color="E1BEE7", end_color="E1BEE7", fill_type="solid"),
+            'Г': PatternFill(start_color="F8BBD0", end_color="F8BBD0", fill_type="solid"),
+            'Д': PatternFill(start_color="D1C4E9", end_color="D1C4E9", fill_type="solid"),
+            'К': PatternFill(start_color="FFE082", end_color="FFE082", fill_type="solid"),
         }
 
-        # Дополнительные цвета (контрастная схема)
-        weekend_fill = PatternFill(start_color="F5F5F5", end_color="F5F5F5",
-                                   fill_type="solid")  # Выходные - светло-серый
-        holiday_fill = PatternFill(start_color="FFCDD2", end_color="FFCDD2", fill_type="solid")  # Праздники - розовый
-        header_fill = PatternFill(start_color="64B5F6", end_color="64B5F6", fill_type="solid")  # Заголовки - голубой
-        month_fill = PatternFill(start_color="C8E6C9", end_color="C8E6C9", fill_type="solid")  # НЕ используется
-        month_fill_alt = PatternFill(start_color="E0E0E0", end_color="E0E0E0", fill_type="solid")  # НЕ используется
-        year_header_fill = PatternFill(start_color="42A5F5", end_color="42A5F5",
-                                       fill_type="solid")  # Заголовок года - синий
-        legend_header_fill = PatternFill(start_color="F5F5F5", end_color="F5F5F5",
-                                         fill_type="solid")  # Легенда - светло-серый
+        weekend_fill = PatternFill(start_color="F5F5F5", end_color="F5F5F5", fill_type="solid")
+        holiday_fill = PatternFill(start_color="FFCDD2", end_color="FFCDD2", fill_type="solid")
+        header_fill = PatternFill(start_color="64B5F6", end_color="64B5F6", fill_type="solid")
+        month_fill = PatternFill(start_color="C8E6C9", end_color="C8E6C9", fill_type="solid")
+        month_fill_alt = PatternFill(start_color="E0E0E0", end_color="E0E0E0", fill_type="solid")
+        year_header_fill = PatternFill(start_color="42A5F5", end_color="42A5F5", fill_type="solid")
+        legend_header_fill = PatternFill(start_color="F5F5F5", end_color="F5F5F5", fill_type="solid")
 
         # ===== ЛИСТ 1: УСЛОВНЫЕ ОБОЗНАЧЕНИЯ =====
         ws_legend = wb.active
@@ -157,7 +149,6 @@ class EducationalScheduleApp:
 
         current_row = 1
 
-        # Главный заголовок
         ws_legend.merge_cells(f'A{current_row}:F{current_row}')
         ws_legend[f'A{current_row}'] = f"КАЛЕНДАРНЫЙ УЧЕБНЫЙ ГРАФИК {start_year}-{start_year + program_years} г."
         ws_legend[f'A{current_row}'].font = title_font
@@ -167,9 +158,8 @@ class EducationalScheduleApp:
         ws_legend.row_dimensions[current_row].height = 35
         current_row += 1
 
-        current_row += 1  # Пустая строка
+        current_row += 1
 
-        # Заголовок легенды
         ws_legend.merge_cells(f'A{current_row}:F{current_row}')
         ws_legend[f'A{current_row}'] = "УСЛОВНЫЕ ОБОЗНАЧЕНИЯ"
         ws_legend[f'A{current_row}'].font = legend_header_font
@@ -179,7 +169,6 @@ class EducationalScheduleApp:
         ws_legend.row_dimensions[current_row].height = 25
         current_row += 1
 
-        # Легенда с описаниями
         legend_items = [
             ('Т', 'Теоретическое обучение', activity_fills.get('Т')),
             ('Э', 'Экзаменационная сессия', activity_fills.get('Э')),
@@ -194,14 +183,12 @@ class EducationalScheduleApp:
         ]
 
         for symbol, description, fill in legend_items:
-            # Символ
             ws_legend[f'A{current_row}'] = symbol
             ws_legend[f'A{current_row}'].font = Font(name='Calibri', size=11, bold=True, color='000000')
             ws_legend[f'A{current_row}'].alignment = Alignment(horizontal='center', vertical='center')
             ws_legend[f'A{current_row}'].fill = fill
             ws_legend[f'A{current_row}'].border = thin_border
 
-            # Описание
             ws_legend.merge_cells(f'B{current_row}:F{current_row}')
             ws_legend[f'B{current_row}'] = description
             ws_legend[f'B{current_row}'].font = legend_font
@@ -211,7 +198,6 @@ class EducationalScheduleApp:
             ws_legend.row_dimensions[current_row].height = 22
             current_row += 1
 
-        # Настройка размеров колонок для листа легенды
         ws_legend.column_dimensions['A'].width = 8
         ws_legend.column_dimensions['B'].width = 50
         ws_legend.column_dimensions['C'].width = 10
@@ -224,7 +210,6 @@ class EducationalScheduleApp:
 
         current_row = 1
 
-        # Главный заголовок
         ws.merge_cells(f'A{current_row}:BB{current_row}')
         ws[f'A{current_row}'] = f"КАЛЕНДАРНЫЙ УЧЕБНЫЙ ГРАФИК {start_year}-{start_year + program_years} г."
         ws[f'A{current_row}'].font = title_font
@@ -234,13 +219,11 @@ class EducationalScheduleApp:
         ws.row_dimensions[current_row].height = 35
         current_row += 1
 
-        current_row += 1  # Пустая строка
+        current_row += 1
 
-        # ===== КАЛЕНДАРИ ДЛЯ КАЖДОГО ГОДА =====
         for academic_year in range(program_years):
             actual_year = start_year + academic_year
 
-            # Заголовок года
             ws.merge_cells(f'A{current_row}:BB{current_row}')
             ws[f'A{current_row}'] = f"УЧЕБНЫЙ ГОД {actual_year}-{actual_year + 1}"
             ws[f'A{current_row}'].font = year_title_font
@@ -250,9 +233,8 @@ class EducationalScheduleApp:
             ws.row_dimensions[current_row].height = 28
             current_row += 1
 
-            current_row += 1  # Пустая строка
+            current_row += 1
 
-            # Создаем календарь для года
             current_row = self.create_horizontal_calendar(
                 ws, actual_year, generated_schedule,
                 activity_fills, weekend_fill, holiday_fill,
@@ -260,12 +242,14 @@ class EducationalScheduleApp:
                 month_fill, month_fill_alt, data_font, current_row
             )
 
-            current_row += 2  # Две пустые строки между годами
+            current_row += 2
 
-        # Настройка размеров колонок для календаря
         ws.column_dimensions['A'].width = 6
         for col_idx in range(2, 60):
             ws.column_dimensions[get_column_letter(col_idx)].width = 4.5
+
+        # ===== ЛИСТ 3: ИТОГИ =====
+        self.create_beautiful_summary_sheet(wb, generated_schedule, start_year, program_type)
 
         return wb
 
@@ -273,17 +257,13 @@ class EducationalScheduleApp:
                                    activity_fills, weekend_fill, holiday_fill,
                                    thin_border, header_font, header_fill,
                                    month_fill, month_fill_alt, data_font, start_row):
-        """
-        ГОРИЗОНТАЛЬНЫЙ КАЛЕНДАРЬ С УЛУЧШЕННЫМ ФОРМАТИРОВАНИЕМ
-        """
+        """ГОРИЗОНТАЛЬНЫЙ КАЛЕНДАРЬ"""
         current_row = start_row
 
-        # 1. Генерируем недели учебного года
         start_date = datetime(start_year, 9, 1)
         end_date = datetime(start_year + 1, 8, 31)
         first_monday = self.get_monday_of_week(start_date)
 
-        # Массив всех недель
         all_weeks = []
         current_date = first_monday
         while current_date <= end_date:
@@ -291,43 +271,35 @@ class EducationalScheduleApp:
             all_weeks.append(week_dates)
             current_date += timedelta(days=7)
 
-        # Создаём мапу месяцев на порядковый номер в учебном году для чередования шрифта
         academic_months_list = [(start_year, m) for m in range(9, 13)] + \
                                [(start_year + 1, m) for m in range(1, 9)]
         month_to_index = {}
         for idx, month_key in enumerate(academic_months_list):
             month_to_index[month_key] = idx
 
-        # 2. Строка "Месяц" и месяцы
         ws[f'A{current_row}'] = 'Месяц'
         ws[f'A{current_row}'].font = header_font
         ws[f'A{current_row}'].fill = header_fill
         ws[f'A{current_row}'].alignment = Alignment(horizontal='center', vertical='center')
         ws[f'A{current_row}'].border = thin_border
 
-        # Определяем колонки для каждого месяца - ИСПРАВЛЕНО
         month_columns = {}
         for week_idx, week_dates in enumerate(all_weeks):
             col = week_idx + 2
-            # Находим дни недели, которые входят в учебный год
             days_in_range = [d for d in week_dates if start_date <= d <= end_date]
             if days_in_range:
-                # Берём последний день недели, который входит в диапазон
-                # (это гарантирует правильное отнесение недели к месяцу)
                 representative_date = days_in_range[-1]
                 month_key = (representative_date.year, representative_date.month)
                 if month_key not in month_columns:
                     month_columns[month_key] = []
                 month_columns[month_key].append(col)
 
-        # Пишем месяцы с чередованием цветов
         academic_months = [(start_year, m) for m in range(9, 13)] + \
                           [(start_year + 1, m) for m in range(1, 9)]
 
-        # Толстая граница для разделения месяцев (мягкий цвет)
         thick_month_border = Border(
             left=Side(style='thin', color='E0E0E0'),
-            right=Side(style='medium', color='B0BEC5'),  # Мягкая серо-голубая граница
+            right=Side(style='medium', color='B0BEC5'),
             top=Side(style='thin', color='E0E0E0'),
             bottom=Side(style='thin', color='E0E0E0')
         )
@@ -339,27 +311,21 @@ class EducationalScheduleApp:
                 start_col = cols[0]
                 end_col = cols[-1]
 
-                # Применяем БЕЗ заливки ко всем ячейкам месяца
                 for col in range(start_col, end_col + 1):
                     cell = ws.cell(row=current_row, column=col)
 
-                    # Первая ячейка содержит название месяца
                     if col == start_col:
                         cell.value = self.month_names_ru[month]
-                        cell.font = Font(name='Calibri', size=10, bold=True, color='424242')  # Тёмно-серый текст
+                        cell.font = Font(name='Calibri', size=10, bold=True, color='424242')
 
-                    # БЕЗ заливки - просто белый фон
                     cell.fill = PatternFill(start_color="FFFFFF", end_color="FFFFFF", fill_type="solid")
-
                     cell.alignment = Alignment(horizontal='center', vertical='center')
 
-                    # Последняя колонка месяца получает толстую правую границу
                     if col == end_col:
                         cell.border = thick_month_border
                     else:
                         cell.border = thin_border
 
-                # Мержим ячейки для названия месяца
                 if start_col != end_col:
                     ws.merge_cells(
                         f'{get_column_letter(start_col)}{current_row}:{get_column_letter(end_col)}{current_row}')
@@ -367,16 +333,7 @@ class EducationalScheduleApp:
         ws.row_dimensions[current_row].height = 20
         current_row += 1
 
-        # 3. Дни недели с числами (7 строк) - ДОБАВЛЕНО ЧЕРЕДОВАНИЕ ШРИФТА
         days_of_week = ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Вс']
-
-        # Толстая граница для разделения месяцев
-        thick_month_border = Border(
-            left=Side(style='thin', color='E0E0E0'),
-            right=Side(style='medium', color='B0BEC5'),
-            top=Side(style='thin', color='E0E0E0'),
-            bottom=Side(style='thin', color='E0E0E0')
-        )
 
         for day_idx, day_name in enumerate(days_of_week):
             ws[f'A{current_row}'] = day_name
@@ -394,14 +351,12 @@ class EducationalScheduleApp:
                 if start_date <= date <= end_date:
                     cell.value = date.day
 
-                    # Определяем, должен ли шрифт быть полужирным - НОВОЕ
                     month_key = (date.year, date.month)
                     month_index = month_to_index.get(month_key, 0)
-                    is_bold = month_index % 2 == 0  # Чётные месяцы (сентябрь=0) - полужирные
+                    is_bold = month_index % 2 == 0
 
                     cell.alignment = Alignment(horizontal='center', vertical='center')
 
-                    # Проверяем, является ли эта колонка последней в месяце
                     is_last_col_of_month = False
                     for m_key, cols in month_columns.items():
                         if col == max(cols):
@@ -412,7 +367,7 @@ class EducationalScheduleApp:
 
                     if self.is_holiday(date):
                         cell.fill = holiday_fill
-                        cell.font = Font(name='Calibri', size=10, bold=True, color='D32F2F')  # Яркий красный
+                        cell.font = Font(name='Calibri', size=10, bold=True, color='D32F2F')
                     elif date.weekday() >= 5:
                         cell.fill = weekend_fill
                         cell.font = Font(name='Calibri', size=10, bold=is_bold, color='000000')
@@ -426,20 +381,11 @@ class EducationalScheduleApp:
             ws.row_dimensions[current_row].height = 18
             current_row += 1
 
-        # 4. Строка "Нед" с номерами недель
         ws[f'A{current_row}'] = 'Неделя'
         ws[f'A{current_row}'].font = header_font
         ws[f'A{current_row}'].fill = header_fill
         ws[f'A{current_row}'].alignment = Alignment(horizontal='center', vertical='center')
         ws[f'A{current_row}'].border = thin_border
-
-        # Толстая граница для разделения месяцев
-        thick_month_border_week = Border(
-            left=Side(style='thin', color='E0E0E0'),
-            right=Side(style='medium', color='B0BEC5'),
-            top=Side(style='thin', color='E0E0E0'),
-            bottom=Side(style='thin', color='E0E0E0')
-        )
 
         for week_idx in range(len(all_weeks)):
             col = week_idx + 2
@@ -447,34 +393,29 @@ class EducationalScheduleApp:
             cell.value = week_idx + 1
             cell.font = Font(name='Calibri', size=10, bold=True, color='FFFFFF')
             cell.alignment = Alignment(horizontal='center', vertical='center')
-            cell.fill = PatternFill(start_color="66BB6A", end_color="66BB6A", fill_type="solid")  # Яркий зелёный
+            cell.fill = PatternFill(start_color="66BB6A", end_color="66BB6A", fill_type="solid")
 
-            # Проверяем, является ли эта колонка последней в месяце
             is_last_col_of_month = False
             for month_key, cols in month_columns.items():
                 if col == max(cols):
                     is_last_col_of_month = True
                     break
 
-            cell.border = thick_month_border_week if is_last_col_of_month else thin_border
+            cell.border = thick_month_border if is_last_col_of_month else thin_border
 
         ws.row_dimensions[current_row].height = 20
         current_row += 1
 
-        # 5. Пустая строка-разделитель
         current_row += 1
 
-        # 6. Заголовок секции с обозначениями
         ws[f'A{current_row}'] = 'Занятия'
         ws[f'A{current_row}'].font = Font(name='Calibri', size=10, bold=True, color='FFFFFF')
-        ws[f'A{current_row}'].fill = PatternFill(start_color="66BB6A", end_color="66BB6A",
-                                                 fill_type="solid")  # Яркий зелёный
+        ws[f'A{current_row}'].fill = PatternFill(start_color="66BB6A", end_color="66BB6A", fill_type="solid")
         ws[f'A{current_row}'].alignment = Alignment(horizontal='center', vertical='center')
         ws[f'A{current_row}'].border = thin_border
         ws.row_dimensions[current_row].height = 20
         current_row += 1
 
-        # 7. Дни недели с обозначениями занятий (7 строк)
         for day_idx, day_name in enumerate(days_of_week):
             ws[f'A{current_row}'] = day_name
             ws[f'A{current_row}'].font = header_font
@@ -488,14 +429,12 @@ class EducationalScheduleApp:
 
                 cell = ws.cell(row=current_row, column=col)
 
-                # Проверяем, является ли эта колонка последней в месяце
                 is_last_col_of_month = False
                 for month_key, cols in month_columns.items():
                     if col == max(cols):
                         is_last_col_of_month = True
                         break
 
-                # Толстая граница для разделения месяцев
                 thick_month_border_activity = Border(
                     left=Side(style='thin', color='E0E0E0'),
                     right=Side(style='medium', color='B0BEC5'),
@@ -509,20 +448,18 @@ class EducationalScheduleApp:
                     if self.is_holiday(date):
                         cell.value = '*'
                         cell.fill = holiday_fill
-                        cell.font = Font(name='Calibri', size=10, bold=True, color='D32F2F')  # Яркий красный
+                        cell.font = Font(name='Calibri', size=10, bold=True, color='D32F2F')
                         cell.alignment = Alignment(horizontal='center', vertical='center')
                     elif date.weekday() >= 5:
                         cell.fill = weekend_fill
                     else:
-                        # Проверяем тип занятия
                         activity_type = self.get_activity_for_date(date, generated_schedule)
                         if activity_type and activity_type in activity_fills:
                             cell.value = activity_type
 
-                            # Определяем, должен ли шрифт быть полужирным - НОВОЕ
                             month_key = (date.year, date.month)
                             month_index = month_to_index.get(month_key, 0)
-                            is_bold = month_index % 2 == 0  # Чётные месяцы - полужирные
+                            is_bold = month_index % 2 == 0
 
                             cell.font = Font(name='Calibri', size=10, bold=is_bold, color='000000')
                             cell.fill = activity_fills[activity_type]
@@ -543,6 +480,480 @@ class EducationalScheduleApp:
                 return period['type']
         return None
 
+    def create_beautiful_summary_sheet(self, wb, generated_schedule, start_year, program_type):
+        """Создать итоговую таблицу точно как в примере"""
+        ws = wb.create_sheet("Итоги")
+
+        program_years = 2 if "Ординатура" in program_type else 3
+
+        # Стили
+        title_font = Font(name='Calibri', size=12, bold=True, color='1976D2')
+        header_font = Font(name='Calibri', size=11, bold=True, color='FFFFFF')
+        bold_font = Font(name='Calibri', size=10, bold=True, color='000000')
+        data_font = Font(name='Calibri', size=10, color='000000')
+
+        header_fill = PatternFill(start_color="92CDDC", end_color="92CDDC", fill_type="solid")
+
+        # Собираем статистику
+        stats = {}
+        holidays_count = {}  # Подсчет праздничных дней
+
+        for period in generated_schedule:
+            year = period['year']
+            semester = period['semester']
+            activity_type = period['type']
+            weeks = period['weeks']
+            days = len(period['days'])
+
+            key = (year, semester)
+            if key not in stats:
+                stats[key] = {}
+                holidays_count[key] = 0
+
+            # Подсчет праздничных дней
+            for day in period['days']:
+                if self.is_holiday(day):
+                    holidays_count[key] += 1
+
+            # Обработка ГИА
+            if activity_type == 'ГИА':
+                if 'Г' not in stats[key]:
+                    stats[key]['Г'] = {'weeks': 0, 'days': 0}
+                if 'Д' not in stats[key]:
+                    stats[key]['Д'] = {'weeks': 0, 'days': 0}
+                stats[key]['Г']['weeks'] += weeks / 2
+                stats[key]['Г']['days'] += days // 2
+                stats[key]['Д']['weeks'] += weeks / 2
+                stats[key]['Д']['days'] += days - (days // 2)
+                continue
+
+            if activity_type not in stats[key]:
+                stats[key][activity_type] = {'weeks': 0, 'days': 0}
+
+            stats[key][activity_type]['weeks'] += weeks
+            stats[key][activity_type]['days'] += days
+
+        current_row = 1
+
+        # ===== ЗАГОЛОВОК "Сводные данные" =====
+        ws[f'A{current_row}'] = 'Сводные данные'
+        ws[f'A{current_row}'].font = title_font
+        ws[f'A{current_row}'].alignment = Alignment(horizontal='left', vertical='center')
+        ws.row_dimensions[current_row].height = 25
+        current_row += 2
+
+        # ===== ПУСТЫЕ СТРОКИ ДЛЯ ЗАГОЛОВКОВ =====
+        current_row += 1
+
+        # ===== СТРОКА С КУРСАМИ =====
+        col_offset = 4  # ПРИБЛИЖАЕМ К НАЗВАНИЯМ! Колонка D вместо O
+
+        for year in range(1, program_years + 1):
+            col_start = col_offset + (year - 1) * 6
+            col_end = col_start + 5
+            ws.merge_cells(f'{get_column_letter(col_start)}{current_row}:{get_column_letter(col_end)}{current_row}')
+            cell = ws[f'{get_column_letter(col_start)}{current_row}']
+            cell.value = f'Курс {year}'
+            cell.font = header_font
+            cell.fill = header_fill
+            cell.alignment = Alignment(horizontal='center', vertical='center')
+
+        current_row += 1
+
+        # ===== СТРОКА С СЕМЕСТРАМИ =====
+        for year in range(1, program_years + 1):
+            col_start = col_offset + (year - 1) * 6
+            sem_base = (year - 1) * 2
+
+            # Сем. X
+            col1 = col_start
+            col2 = col_start + 1
+            ws.merge_cells(f'{get_column_letter(col1)}{current_row}:{get_column_letter(col2)}{current_row}')
+            cell = ws[f'{get_column_letter(col1)}{current_row}']
+            cell.value = f'Сем. {sem_base + 1}'
+            cell.font = header_font
+            cell.fill = header_fill
+            cell.alignment = Alignment(horizontal='center', vertical='center')
+
+            # Сем. Y
+            col1 = col_start + 2
+            col2 = col_start + 3
+            ws.merge_cells(f'{get_column_letter(col1)}{current_row}:{get_column_letter(col2)}{current_row}')
+            cell = ws[f'{get_column_letter(col1)}{current_row}']
+            cell.value = f'Сем. {sem_base + 2}'
+            cell.font = header_font
+            cell.fill = header_fill
+            cell.alignment = Alignment(horizontal='center', vertical='center')
+
+            # Всего
+            col1 = col_start + 4
+            col2 = col_start + 5
+            ws.merge_cells(f'{get_column_letter(col1)}{current_row}:{get_column_letter(col2)}{current_row}')
+            cell = ws[f'{get_column_letter(col1)}{current_row}']
+            cell.value = 'Всего'
+            cell.font = header_font
+            cell.fill = header_fill
+            cell.alignment = Alignment(horizontal='center', vertical='center')
+
+        current_row += 1
+
+        # ===== ДАННЫЕ =====
+        def format_weeks(weeks):
+            if weeks < 0.01:
+                return ''
+            whole = int(weeks)
+            fraction = weeks - whole
+            if fraction < 0.01:
+                return str(whole) if whole > 0 else ''
+            sixths = round(fraction * 6)
+            if sixths == 0:
+                return str(whole) if whole > 0 else ''
+            elif sixths == 6:
+                return str(whole + 1)
+            else:
+                return f'{whole} {sixths}/6' if whole > 0 else f'{sixths}/6'
+
+        # Список типов деятельности в правильном порядке
+        activity_types = [
+            ('', 'Теоретическое обучение', 'Т'),
+            ('Э', 'Экзаменационные сессии', 'Э'),
+            ('У', 'Учебная практика', 'У'),
+            ('Н', 'Научно-исслед. работа', 'Н'),
+            ('П', 'Производственная практика', 'П'),
+            ('Пд', 'Преддипломная практика', 'Пд'),
+            ('ПА', 'Повторная, вторая повторная промежуточная аттестация', 'ПА'),
+            ('Д', 'Подготовка к процедуре защиты и защита выпускной квалификационной работы', 'Д'),
+            ('Г', 'Подготовка к сдаче и сдача гос. экзамена', 'Г'),
+            ('К', 'Каникулы', 'К'),
+            ('*', 'Нерабочие праздничные дни (не включая воскресенья)', '*'),
+        ]
+
+        for symbol, name, code in activity_types:
+            # Символ (колонка A)
+            ws[f'A{current_row}'] = symbol
+            ws[f'A{current_row}'].font = bold_font
+            ws[f'A{current_row}'].alignment = Alignment(horizontal='center', vertical='center')
+
+            # Название (колонка B)
+            ws[f'B{current_row}'] = name
+            ws[f'B{current_row}'].font = data_font
+            ws[f'B{current_row}'].alignment = Alignment(horizontal='left', vertical='center')
+
+            # Данные
+            for year in range(1, program_years + 1):
+                col_start = col_offset + (year - 1) * 6
+
+                # Семестр 1
+                key = (year, 1)
+                sem1_weeks = 0
+                sem1_days = 0
+                if code == '*':
+                    sem1_days = holidays_count.get(key, 0)
+                elif key in stats and code in stats[key]:
+                    sem1_weeks = stats[key][code]['weeks']
+                    sem1_days = stats[key][code]['days']
+
+                col1 = col_start
+                col2 = col_start + 1
+                ws.merge_cells(f'{get_column_letter(col1)}{current_row}:{get_column_letter(col2)}{current_row}')
+                cell = ws[f'{get_column_letter(col1)}{current_row}']
+                if code == '*':
+                    cell.value = f'{sem1_days} дн' if sem1_days > 0 else ''
+                else:
+                    cell.value = format_weeks(sem1_weeks)
+                cell.font = data_font
+                cell.alignment = Alignment(horizontal='center', vertical='center')
+
+                # Семестр 2
+                key = (year, 2)
+                sem2_weeks = 0
+                sem2_days = 0
+                if code == '*':
+                    sem2_days = holidays_count.get(key, 0)
+                elif key in stats and code in stats[key]:
+                    sem2_weeks = stats[key][code]['weeks']
+                    sem2_days = stats[key][code]['days']
+
+                col1 = col_start + 2
+                col2 = col_start + 3
+                ws.merge_cells(f'{get_column_letter(col1)}{current_row}:{get_column_letter(col2)}{current_row}')
+                cell = ws[f'{get_column_letter(col1)}{current_row}']
+                if code == '*':
+                    cell.value = f'{sem2_days} дн' if sem2_days > 0 else ''
+                else:
+                    cell.value = format_weeks(sem2_weeks)
+                cell.font = data_font
+                cell.alignment = Alignment(horizontal='center', vertical='center')
+
+                # Всего за год
+                year_total_weeks = sem1_weeks + sem2_weeks
+                year_total_days = sem1_days + sem2_days
+                col1 = col_start + 4
+                col2 = col_start + 5
+                ws.merge_cells(f'{get_column_letter(col1)}{current_row}:{get_column_letter(col2)}{current_row}')
+                cell = ws[f'{get_column_letter(col1)}{current_row}']
+                if code == '*':
+                    cell.value = f'{year_total_days} дн' if year_total_days > 0 else ''
+                else:
+                    cell.value = format_weeks(year_total_weeks)
+                cell.font = data_font
+                cell.alignment = Alignment(horizontal='center', vertical='center')
+
+            ws.row_dimensions[current_row].height = 25
+            current_row += 1
+
+            # Дополнительная строка для экзаменов (дни)
+            if code == 'Э':
+                ws[f'A{current_row}'] = symbol
+                ws[f'A{current_row}'].font = bold_font
+                ws[f'A{current_row}'].alignment = Alignment(horizontal='center', vertical='center')
+
+                ws[f'B{current_row}'] = name
+                ws[f'B{current_row}'].font = data_font
+                ws[f'B{current_row}'].alignment = Alignment(horizontal='left', vertical='center')
+
+                for year in range(1, program_years + 1):
+                    col_start = col_offset + (year - 1) * 6
+
+                    # Сем 1 дни
+                    key = (year, 1)
+                    days1 = stats[key][code]['days'] if key in stats and code in stats[key] else 0
+                    col1 = col_start
+                    col2 = col_start + 1
+                    ws.merge_cells(f'{get_column_letter(col1)}{current_row}:{get_column_letter(col2)}{current_row}')
+                    cell = ws[f'{get_column_letter(col1)}{current_row}']
+                    cell.value = f'{days1} дн' if days1 > 0 else ''
+                    cell.font = data_font
+                    cell.alignment = Alignment(horizontal='center', vertical='center')
+
+                    # Сем 2 дни
+                    key = (year, 2)
+                    days2 = stats[key][code]['days'] if key in stats and code in stats[key] else 0
+                    col1 = col_start + 2
+                    col2 = col_start + 3
+                    ws.merge_cells(f'{get_column_letter(col1)}{current_row}:{get_column_letter(col2)}{current_row}')
+                    cell = ws[f'{get_column_letter(col1)}{current_row}']
+                    cell.value = f'{days2} дн' if days2 > 0 else ''
+                    cell.font = data_font
+                    cell.alignment = Alignment(horizontal='center', vertical='center')
+
+                    # Всего дней
+                    total_days = days1 + days2
+                    col1 = col_start + 4
+                    col2 = col_start + 5
+                    ws.merge_cells(f'{get_column_letter(col1)}{current_row}:{get_column_letter(col2)}{current_row}')
+                    cell = ws[f'{get_column_letter(col1)}{current_row}']
+                    cell.value = f'{total_days} дн' if total_days > 0 else ''
+                    cell.font = data_font
+                    cell.alignment = Alignment(horizontal='center', vertical='center')
+
+                ws.row_dimensions[current_row].height = 25
+                current_row += 1
+
+            # Дополнительная строка для каникул (Продолжительность каникул)
+            elif code == 'К':
+                ws[f'A{current_row}'] = symbol
+                ws[f'A{current_row}'].font = bold_font
+                ws[f'A{current_row}'].alignment = Alignment(horizontal='center', vertical='center')
+
+                ws[f'B{current_row}'] = 'Продолжительность каникул'
+                ws[f'B{current_row}'].font = data_font
+                ws[f'B{current_row}'].alignment = Alignment(horizontal='left', vertical='center')
+
+                for year in range(1, program_years + 1):
+                    col_start = col_offset + (year - 1) * 6
+
+                    # Сем 1 дни
+                    key = (year, 1)
+                    days1 = stats[key][code]['days'] if key in stats and code in stats[key] else 0
+                    col1 = col_start
+                    col2 = col_start + 1
+                    ws.merge_cells(f'{get_column_letter(col1)}{current_row}:{get_column_letter(col2)}{current_row}')
+                    cell = ws[f'{get_column_letter(col1)}{current_row}']
+                    cell.value = f'{days1} дн' if days1 > 0 else ''
+                    cell.font = data_font
+                    cell.alignment = Alignment(horizontal='center', vertical='center')
+
+                    # Сем 2 дни
+                    key = (year, 2)
+                    days2 = stats[key][code]['days'] if key in stats and code in stats[key] else 0
+                    col1 = col_start + 2
+                    col2 = col_start + 3
+                    ws.merge_cells(f'{get_column_letter(col1)}{current_row}:{get_column_letter(col2)}{current_row}')
+                    cell = ws[f'{get_column_letter(col1)}{current_row}']
+                    cell.value = f'{days2} дн' if days2 > 0 else ''
+                    cell.font = data_font
+                    cell.alignment = Alignment(horizontal='center', vertical='center')
+
+                    # Всего дней
+                    total_days = days1 + days2
+                    col1 = col_start + 4
+                    col2 = col_start + 5
+                    ws.merge_cells(f'{get_column_letter(col1)}{current_row}:{get_column_letter(col2)}{current_row}')
+                    cell = ws[f'{get_column_letter(col1)}{current_row}']
+                    cell.value = f'{total_days} дн' if total_days > 0 else ''
+                    cell.font = data_font
+                    cell.alignment = Alignment(horizontal='center', vertical='center')
+
+                ws.row_dimensions[current_row].height = 25
+                current_row += 1
+
+            # Строка "в том числе ДО"
+            ws[f'B{current_row}'] = 'в том числе ДО'
+            ws[f'B{current_row}'].font = data_font
+            ws[f'B{current_row}'].alignment = Alignment(horizontal='left', vertical='center')
+            current_row += 1
+
+        # ===== ПУСТАЯ СТРОКА =====
+        current_row += 1
+
+        # ===== ПРОДОЛЖИТЕЛЬНОСТЬ ОБУЧЕНИЯ =====
+        ws[f'A{current_row}'] = 'Продолжительность обучения '
+        ws[f'A{current_row}'].font = bold_font
+
+        for year in range(1, program_years + 1):
+            col_start = col_offset + (year - 1) * 6
+            col_end = col_start + 5
+            ws.merge_cells(f'{get_column_letter(col_start)}{current_row}:{get_column_letter(col_end)}{current_row}')
+            cell = ws[f'{get_column_letter(col_start)}{current_row}']
+            cell.value = 'более 39 нед.'
+            cell.font = data_font
+            cell.alignment = Alignment(horizontal='center', vertical='center')
+
+        current_row += 1
+
+        # ===== ИТОГО =====
+        ws[f'A{current_row}'] = ' Итого'
+        ws[f'A{current_row}'].font = bold_font
+
+        for year in range(1, program_years + 1):
+            col_start = col_offset + (year - 1) * 6
+
+            # Сем 1
+            key = (year, 1)
+            sem1_total = 0
+            if key in stats:
+                for act_type in stats[key]:
+                    sem1_total += stats[key][act_type]['weeks']
+
+            col1 = col_start
+            col2 = col_start + 1
+            ws.merge_cells(f'{get_column_letter(col1)}{current_row}:{get_column_letter(col2)}{current_row}')
+            cell = ws[f'{get_column_letter(col1)}{current_row}']
+            cell.value = format_weeks(sem1_total)
+            cell.font = bold_font
+            cell.alignment = Alignment(horizontal='center', vertical='center')
+
+            # Сем 2
+            key = (year, 2)
+            sem2_total = 0
+            if key in stats:
+                for act_type in stats[key]:
+                    sem2_total += stats[key][act_type]['weeks']
+
+            col1 = col_start + 2
+            col2 = col_start + 3
+            ws.merge_cells(f'{get_column_letter(col1)}{current_row}:{get_column_letter(col2)}{current_row}')
+            cell = ws[f'{get_column_letter(col1)}{current_row}']
+            cell.value = format_weeks(sem2_total)
+            cell.font = bold_font
+            cell.alignment = Alignment(horizontal='center', vertical='center')
+
+            # Всего
+            year_total = sem1_total + sem2_total
+            col1 = col_start + 4
+            col2 = col_start + 5
+            ws.merge_cells(f'{get_column_letter(col1)}{current_row}:{get_column_letter(col2)}{current_row}')
+            cell = ws[f'{get_column_letter(col1)}{current_row}']
+            cell.value = format_weeks(year_total)
+            cell.font = bold_font
+            cell.alignment = Alignment(horizontal='center', vertical='center')
+
+        current_row += 1
+
+        # ===== ПРОДОЛЖИТЕЛЬНОСТЬ =====
+        ws[f'A{current_row}'] = ' Продолжительность'
+        ws[f'A{current_row}'].font = bold_font
+
+        for year in range(1, program_years + 1):
+            col_start = col_offset + (year - 1) * 6
+
+            # Сем 1
+            key = (year, 1)
+            sem1_days = 0
+            if key in stats:
+                for act_type in stats[key]:
+                    sem1_days += stats[key][act_type]['days']
+
+            col1 = col_start
+            col2 = col_start + 1
+            ws.merge_cells(f'{get_column_letter(col1)}{current_row}:{get_column_letter(col2)}{current_row}')
+            cell = ws[f'{get_column_letter(col1)}{current_row}']
+            cell.value = f'{sem1_days} дн' if sem1_days > 0 else ''
+            cell.font = bold_font
+            cell.alignment = Alignment(horizontal='center', vertical='center')
+
+            # Сем 2
+            key = (year, 2)
+            sem2_days = 0
+            if key in stats:
+                for act_type in stats[key]:
+                    sem2_days += stats[key][act_type]['days']
+
+            col1 = col_start + 2
+            col2 = col_start + 3
+            ws.merge_cells(f'{get_column_letter(col1)}{current_row}:{get_column_letter(col2)}{current_row}')
+            cell = ws[f'{get_column_letter(col1)}{current_row}']
+            cell.value = f'{sem2_days} дн' if sem2_days > 0 else ''
+            cell.font = bold_font
+            cell.alignment = Alignment(horizontal='center', vertical='center')
+
+            # Всего
+            year_days = sem1_days + sem2_days
+            col1 = col_start + 4
+            col2 = col_start + 5
+            ws.merge_cells(f'{get_column_letter(col1)}{current_row}:{get_column_letter(col2)}{current_row}')
+            cell = ws[f'{get_column_letter(col1)}{current_row}']
+            cell.value = f'{year_days} дн' if year_days > 0 else ''
+            cell.font = bold_font
+            cell.alignment = Alignment(horizontal='center', vertical='center')
+
+        current_row += 1
+
+        # ===== ВИСОКОСНЫЙ ГОД =====
+        ws[f'A{current_row}'] = ' Високосный год'
+        ws[f'A{current_row}'].font = bold_font
+
+        for year in range(1, program_years + 1):
+            col_start = col_offset + (year - 1) * 6
+            col_end = col_start + 5
+            ws.merge_cells(f'{get_column_letter(col_start)}{current_row}:{get_column_letter(col_end)}{current_row}')
+            cell = ws[f'{get_column_letter(col_start)}{current_row}']
+            cell.value = '-'
+            cell.font = data_font
+            cell.alignment = Alignment(horizontal='center', vertical='center')
+
+        current_row += 1
+
+        # ===== СТУДЕНТОВ =====
+        ws[f'A{current_row}'] = ' Студентов'
+        ws[f'A{current_row}'].font = bold_font
+        current_row += 1
+
+        # Пустые строки
+        current_row += 3
+
+        # ===== ГРУПП =====
+        ws[f'A{current_row}'] = ' Групп'
+        ws[f'A{current_row}'].font = bold_font
+
+        # Настройка ширины колонок
+        ws.column_dimensions['A'].width = 5
+        ws.column_dimensions['B'].width = 70
+        ws.column_dimensions['C'].width = 2
+        for col_idx in range(4, 30):
+            ws.column_dimensions[get_column_letter(col_idx)].width = 10
+
 
 class MainWindow(QMainWindow):
     def __init__(self):
@@ -557,7 +968,7 @@ class MainWindow(QMainWindow):
         self.apply_styles()
 
     def init_ui(self):
-        self.setWindowTitle('Учебный график - Улучшенная версия')
+        self.setWindowTitle('Учебный график - Итоги как в примере')
         self.setGeometry(100, 100, 1500, 900)
 
         central_widget = QWidget()
@@ -591,7 +1002,7 @@ class MainWindow(QMainWindow):
         title = QLabel('📚 Учебный график')
         title.setObjectName("mainTitle")
 
-        subtitle = QLabel('Контрастные яркие цвета + месяцы без заливки')
+        subtitle = QLabel('✅ Итоги в формате примера - точная копия!')
         subtitle.setObjectName("subtitle")
 
         title_layout.addWidget(title)
@@ -741,7 +1152,7 @@ class MainWindow(QMainWindow):
         footer_layout.setContentsMargins(0, 32, 0, 0)
         footer_layout.setSpacing(0)
 
-        authors_label = QLabel('Разработчики: Бахмутов Е., Клюев П. | v2.8 - Контрастные цвета + без заливки месяцев')
+        authors_label = QLabel('Разработчики: Бахмутов Е., Клюев П. | v4.1 - ТОЧНАЯ КОПИЯ ПРИМЕРА!')
         authors_label.setObjectName("authorsLabel")
         authors_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
         footer_layout.addWidget(authors_label)
@@ -1012,7 +1423,6 @@ class MainWindow(QMainWindow):
 
     def load_example(self):
         if "Аспирантура" in self.program_type:
-            # Пример для 3-летней аспирантуры
             self.periods_data = [
                 {"Год": 1, "Семестр": 1, "Тип": "Т", "Недели": 12},
                 {"Год": 1, "Семестр": 1, "Тип": "Э", "Недели": 2},
@@ -1045,7 +1455,6 @@ class MainWindow(QMainWindow):
                 {"Год": 3, "Семестр": 2, "Тип": "К", "Недели": 8}
             ]
         else:
-            # Пример для 2-летней ординатуры
             self.periods_data = [
                 {"Год": 1, "Семестр": 1, "Тип": "Т", "Недели": 10},
                 {"Год": 1, "Семестр": 1, "Тип": "П", "Недели": 12},
@@ -1119,7 +1528,6 @@ class MainWindow(QMainWindow):
             }
         """
 
-        # Год
         year_combo = QComboBox()
         year_combo.addItems(['1', '2', '3'])
         year_combo.setStyleSheet(table_combo_style)
@@ -1131,7 +1539,6 @@ class MainWindow(QMainWindow):
         year_layout.setAlignment(Qt.AlignmentFlag.AlignCenter)
         self.table.setCellWidget(row_position, 0, year_container)
 
-        # Семестр
         semester_combo = QComboBox()
         semester_combo.addItems(['1', '2'])
         semester_combo.setStyleSheet(table_combo_style)
@@ -1143,7 +1550,6 @@ class MainWindow(QMainWindow):
         semester_layout.setAlignment(Qt.AlignmentFlag.AlignCenter)
         self.table.setCellWidget(row_position, 1, semester_container)
 
-        # Тип - расширенный список
         type_combo = QComboBox()
         type_combo.addItems(['Т', 'Э', 'П', 'У', 'ПА', 'ГИА', 'Г', 'Д', 'К'])
         type_combo.setStyleSheet(table_combo_style)
@@ -1155,7 +1561,6 @@ class MainWindow(QMainWindow):
         type_layout.setAlignment(Qt.AlignmentFlag.AlignCenter)
         self.table.setCellWidget(row_position, 2, type_container)
 
-        # Недели
         weeks_item = QTableWidgetItem('1.0')
         weeks_item.setTextAlignment(Qt.AlignmentFlag.AlignCenter | Qt.AlignmentFlag.AlignVCenter)
         font = QFont()
@@ -1221,7 +1626,6 @@ class MainWindow(QMainWindow):
             row_position = self.table.rowCount()
             self.table.insertRow(row_position)
 
-            # Год
             year_combo = QComboBox()
             year_combo.addItems(['1', '2', '3'])
             year_combo.setCurrentText(str(data['Год']))
@@ -1234,7 +1638,6 @@ class MainWindow(QMainWindow):
             year_layout.setAlignment(Qt.AlignmentFlag.AlignCenter)
             self.table.setCellWidget(row_position, 0, year_container)
 
-            # Семестр
             semester_combo = QComboBox()
             semester_combo.addItems(['1', '2'])
             semester_combo.setCurrentText(str(data['Семестр']))
@@ -1247,7 +1650,6 @@ class MainWindow(QMainWindow):
             semester_layout.setAlignment(Qt.AlignmentFlag.AlignCenter)
             self.table.setCellWidget(row_position, 1, semester_container)
 
-            # Тип
             type_combo = QComboBox()
             type_combo.addItems(['Т', 'Э', 'П', 'У', 'ПА', 'ГИА', 'Г', 'Д', 'К'])
             type_combo.setCurrentText(data['Тип'])
@@ -1260,7 +1662,6 @@ class MainWindow(QMainWindow):
             type_layout.setAlignment(Qt.AlignmentFlag.AlignCenter)
             self.table.setCellWidget(row_position, 2, type_container)
 
-            # Недели
             weeks_item = QTableWidgetItem(str(data['Недели']))
             weeks_item.setTextAlignment(Qt.AlignmentFlag.AlignCenter | Qt.AlignmentFlag.AlignVCenter)
             font = QFont()
@@ -1306,7 +1707,6 @@ class MainWindow(QMainWindow):
         try:
             self.generated_schedule = self.app.generate_schedule(periods_data, self.start_year)
 
-            # Обновление предварительного просмотра
             self.preview_table.setRowCount(0)
             for period in self.generated_schedule:
                 row_position = self.preview_table.rowCount()
