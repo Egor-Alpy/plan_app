@@ -1087,7 +1087,13 @@ class MainWindow(QMainWindow):
         self.table.setAlternatingRowColors(True)
         self.table.setShowGrid(False)
         self.table.setMinimumHeight(400)
+        self.table.itemChanged.connect(self.update_weeks_total)
         container_layout.addWidget(self.table)
+
+        # Метка для отображения суммы недель
+        self.weeks_total_label = QLabel('Всего недель: 0')
+        self.weeks_total_label.setObjectName("weeksTotalLabel")
+        container_layout.addWidget(self.weeks_total_label)
 
         table_btn_row = QHBoxLayout()
         table_btn_row.setSpacing(12)
@@ -1205,6 +1211,17 @@ class MainWindow(QMainWindow):
                 color: #6b7280;
                 font-weight: 400;
                 opacity: 0.7;
+            }
+
+            QLabel#weeksTotalLabel {
+                font-size: 16px;
+                font-weight: 600;
+                color: #34d399;
+                margin-top: 8px;
+                padding: 8px;
+                background-color: #1a1c24;
+                border-radius: 6px;
+                border: 1px solid #31343f;
             }
 
             QComboBox {
@@ -1574,6 +1591,20 @@ class MainWindow(QMainWindow):
         current_row = self.table.currentRow()
         if current_row >= 0:
             self.table.removeRow(current_row)
+            self.update_weeks_total()
+
+    def update_weeks_total(self):
+        """Обновить подсчет общего количества недель"""
+        total_weeks = 0
+        for row in range(self.table.rowCount()):
+            weeks_item = self.table.item(row, 3)
+            if weeks_item:
+                try:
+                    weeks = float(weeks_item.text())
+                    total_weeks += weeks
+                except ValueError:
+                    pass
+        self.weeks_total_label.setText(f'Всего недель: {total_weeks:.1f}')
 
     def update_table(self):
         self.table.setRowCount(0)
@@ -1671,6 +1702,8 @@ class MainWindow(QMainWindow):
 
             self.table.setRowHeight(row_position, 82)
 
+        self.update_weeks_total()
+
     def get_table_data(self):
         data = []
         for row in range(self.table.rowCount()):
@@ -1687,6 +1720,20 @@ class MainWindow(QMainWindow):
 
                     if year_combo and semester_combo and type_combo:
                         weeks = float(weeks_item.text())
+
+                        # Валидация количества недель
+                        if weeks < 0:
+                            QMessageBox.warning(self, 'Ошибка валидации',
+                                              f'Ошибка в строке {row + 1}: Количество недель не может быть отрицательным!\n'
+                                              f'Введено: {weeks}')
+                            return None
+
+                        if weeks > 53:
+                            QMessageBox.warning(self, 'Ошибка валидации',
+                                              f'Ошибка в строке {row + 1}: Количество недель не может превышать 53!\n'
+                                              f'Введено: {weeks}')
+                            return None
+
                         data.append({
                             'Год': int(year_combo.currentText()),
                             'Семестр': int(semester_combo.currentText()),
@@ -1694,7 +1741,10 @@ class MainWindow(QMainWindow):
                             'Недели': weeks
                         })
                 except ValueError:
-                    pass
+                    QMessageBox.warning(self, 'Ошибка валидации',
+                                      f'Ошибка в строке {row + 1}: Некорректное значение в столбце "Недели"!\n'
+                                      f'Введите число (можно дробное, например: 2.5)')
+                    return None
         return data
 
     def generate_schedule(self):
