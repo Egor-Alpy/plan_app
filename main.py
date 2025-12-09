@@ -1002,7 +1002,7 @@ class MainWindow(QMainWindow):
         title = QLabel('📚 Учебный график')
         title.setObjectName("mainTitle")
 
-        subtitle = QLabel('✅ Итоги в формате примера - точная копия!')
+        subtitle = QLabel('Конструктор для составления учебного графика!')
         subtitle.setObjectName("subtitle")
 
         title_layout.addWidget(title)
