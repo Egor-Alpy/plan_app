@@ -1002,7 +1002,7 @@ class MainWindow(QMainWindow):
         title = QLabel('📚 Учебный график')
         title.setObjectName("mainTitle")
 
-        subtitle = QLabel('Конструктор для составления учебного графика!')
+        subtitle = QLabel('Конструктор для составления учебного графикаy!')
         subtitle.setObjectName("subtitle")
 
         title_layout.addWidget(title)
@@ -1158,7 +1158,7 @@ class MainWindow(QMainWindow):
         footer_layout.setContentsMargins(0, 32, 0, 0)
         footer_layout.setSpacing(0)
 
-        authors_label = QLabel('Разработчики: Бахмутов Е., Клюев П. | v4.1 - ТОЧНАЯ КОПИЯ ПРИМЕРА!')
+        authors_label = QLabel('Разработчики: Бахмутов Е., Клюев П. | v1.4.3')
         authors_label.setObjectName("authorsLabel")
         authors_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
         footer_layout.addWidget(authors_label)
@@ -1434,6 +1434,7 @@ class MainWindow(QMainWindow):
 
     def on_program_changed(self, text):
         self.program_type = text
+        self.update_weeks_total()  # Обновляем счетчик недель при смене типа программы
 
     def on_year_changed(self, text):
         self.start_year = int(text)
@@ -1604,7 +1605,36 @@ class MainWindow(QMainWindow):
                     total_weeks += weeks
                 except ValueError:
                     pass
-        self.weeks_total_label.setText(f'Всего недель: {total_weeks:.1f}')
+
+        # Вычисляем максимально возможное количество недель
+        program_years = 2 if "Ординатура" in self.program_type else 3
+        max_weeks = program_years * 52
+
+        # Меняем цвет в зависимости от превышения лимита
+        if total_weeks > max_weeks:
+            self.weeks_total_label.setText(f'Всего недель: {total_weeks:.1f} / {max_weeks} ⚠️ ПРЕВЫШЕНИЕ!')
+            self.weeks_total_label.setStyleSheet("""
+                font-size: 16px;
+                font-weight: 600;
+                color: #ef4444;
+                margin-top: 8px;
+                padding: 8px;
+                background-color: #1a1c24;
+                border-radius: 6px;
+                border: 2px solid #ef4444;
+            """)
+        else:
+            self.weeks_total_label.setText(f'Всего недель: {total_weeks:.1f} / {max_weeks}')
+            self.weeks_total_label.setStyleSheet("""
+                font-size: 16px;
+                font-weight: 600;
+                color: #34d399;
+                margin-top: 8px;
+                padding: 8px;
+                background-color: #1a1c24;
+                border-radius: 6px;
+                border: 1px solid #31343f;
+            """)
 
     def update_table(self):
         self.table.setRowCount(0)
@@ -1752,6 +1782,20 @@ class MainWindow(QMainWindow):
 
         if not periods_data:
             QMessageBox.warning(self, 'Внимание', 'Добавьте периоды обучения')
+            return
+
+        # Проверка на превышение максимального количества недель
+        total_weeks = sum(period['Недели'] for period in periods_data)
+        program_years = 2 if "Ординатура" in self.program_type else 3
+        max_weeks = program_years * 52
+
+        if total_weeks > max_weeks:
+            QMessageBox.critical(self, 'Ошибка валидации',
+                               f'❌ Суммарное количество недель превышает физически возможное!\n\n'
+                               f'📊 Введено недель: {total_weeks:.1f}\n'
+                               f'📅 Максимум для программы ({program_years} года): {max_weeks} недель\n'
+                               f'⚠️ Превышение: {total_weeks - max_weeks:.1f} недель\n\n'
+                               f'Пожалуйста, уменьшите количество недель в периодах.')
             return
 
         try:
